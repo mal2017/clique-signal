@@ -30,52 +30,56 @@ setMethod("pwms",
           })
 
 setGeneric("combine",
-           function(tf1, tf2, name=NULL, ...) {
+           function(tf1, tf2, name=name(tf1), ...) {
              if (length(list(...)) > 0) {
-               combine(x, do.call(combine, list(tf1,...)))
+               combine(tf1, do.call(combine, list(tf2,...)))
              } else {
                standardGeneric("combine")
              }
            }
 )
-
 setMethod("combine",
           signature(tf1 = "TranscriptionFactor",
                     tf2 = "TranscriptionFactor"),
-          function(tf1,tf2, name = NULL, ...) {
-            if (name(tf1) != name(tf2)) {
-              if (is.null(name)) stop("Supply a name for your combined TF.")
+          function(tf1, tf2, name = NULL, ...) {
               new_name <- name
-            } else {
-              if (is.null(name)) {
-                new_name <- name(tf1)
-              } else {
-                new_name <- name
-              }
-            }
-            pwms <- do.call('c',
-                            unlist(lapply(c(tf1,tf2),
-                                          FUN = function(x) pwms(x))))
-            return(TranscriptionFactor(name = name, pwms = pwms))
-})
+              if (is.null(name)) new_name <- name(tf1)
+              pwms <- do.call('c',
+                              unlist(lapply(c(tf1,tf2),
+                              FUN = function(x) pwms(x))))
+              return(TranscriptionFactor(name = new_name, pwms = pwms))
+          }
+)
+
+setGeneric("name<-", function(tf, value) standardGeneric("name<-"))
+
+setReplaceMethod("name",signature(tf="TranscriptionFactor",
+                                  value="character"),
+                 function(tf, value){
+                   tf@name <- value
+                   tf
+                 }
+)
 # -----------------------------------------------------------------------------
 
 #' @rdname Clique
 #' @export
 setClass("Clique",
-         contains = "SimpleList",
+         contains = "TranscriptionFactor",
          representation(members = "character",
-                        name = "character"))
-
+                        hash = "md5")
+         )
 
 Clique <- function(tfs, name = NULL) {
   members <- sort(unlist(apply(tfs, FUN = function(x) name(x))))
-  name <-
-  new("Clique", SimpleList(tfs),members )
-
+  if (is.null(name)) {
+    name <- paste(members,collapse = ",")
+    hash <- substr(openssl::md5(name),1,8)
+  }
+  new_clique <- do.call(combine,tfs)
+  new("Clique", new_clique, members = members, hash = hash)
 }
 # -----------------------------------------------------------------------------
-
 
 #' @rdname CliqueList
 #' @export
