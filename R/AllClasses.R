@@ -1,3 +1,14 @@
+# unionClasses ----------------------------------------------------------------
+setClassUnion("characterOrNULL",c("character","NULL"))
+setClassUnion("GRangesListOrNULL",c("GRangesList","NULL"))
+setClassUnion("GRangesOrNULL",c("GRanges","NULL"))
+setClassUnion("DataFrameOrNULL",c("DataFrame","NULL"))
+
+
+# -----------------------------------------------------------------------------
+# classes ---------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 #' @rdname TranscriptionFactor
 #' @export
 setClass("TranscriptionFactor",
@@ -15,51 +26,12 @@ TranscriptionFactor <- function(name, pwms = NULL) {
   new("TranscriptionFactor",name = name, pwms = pwmlist)
 }
 
-setGeneric("name", function(tf) standardGeneric("name"))
-setMethod("name",
-          signature(tf = "TranscriptionFactor"),
-          function(tf) {
-            return(tf@name)
-          })
 
-setGeneric("pwms", function(tf) standardGeneric("pwms"))
-setMethod("pwms",
-          signature(tf = "TranscriptionFactor"),
-          function(tf) {
-            return(tf@pwms)
-          })
 
-setGeneric("combine",
-           function(tf1, tf2, name=name(tf1), ...) {
-             if (length(list(...)) > 0) {
-               combine(tf1, do.call(combine, list(tf2,...)))
-             } else {
-               standardGeneric("combine")
-             }
-           }
-)
-setMethod("combine",
-          signature(tf1 = "TranscriptionFactor",
-                    tf2 = "TranscriptionFactor"),
-          function(tf1, tf2, name = NULL, ...) {
-              new_name <- name
-              if (is.null(name)) new_name <- name(tf1)
-              pwms <- do.call('c',
-                              unlist(lapply(c(tf1,tf2),
-                              FUN = function(x) pwms(x))))
-              return(TranscriptionFactor(name = new_name, pwms = pwms))
-          }
-)
 
-setGeneric("name<-", function(tf, value) standardGeneric("name<-"))
 
-setReplaceMethod("name",signature(tf="TranscriptionFactor",
-                                  value="character"),
-                 function(tf, value){
-                   tf@name <- value
-                   tf
-                 }
-)
+
+
 # -----------------------------------------------------------------------------
 
 #' @rdname Clique
@@ -67,27 +39,73 @@ setReplaceMethod("name",signature(tf="TranscriptionFactor",
 setClass("Clique",
          contains = "TranscriptionFactor",
          representation(members = "character",
-                        hash = "md5")
-         )
+                        hash = "ANY"))
 
-Clique <- function(tfs, name = NULL) {
-  members <- sort(unlist(apply(tfs, FUN = function(x) name(x))))
-  if (is.null(name)) {
-    name <- paste(members,collapse = ",")
-    hash <- substr(openssl::md5(name),1,8)
-  }
+Clique <- function(tf, ..., name = NULL) {
+  others <- list(...)
+  tfs <- c(tf,others)
+  members <- sort(unlist(lapply(tfs, FUN = function(x) name(x))))
+  derived_name <- paste(members,collapse = ",")
+  hash <- substr(openssl::md5(derived_name),1,8)
   new_clique <- do.call(combine,tfs)
+  if (is.null(name)) {
+    name(new_clique) <- derived_name
+  } else {
+    name(new_clique) <- name
+  }
   new("Clique", new_clique, members = members, hash = hash)
 }
+
+
 # -----------------------------------------------------------------------------
 
 #' @rdname CliqueList
 #' @export
 setClass("CliqueList",
-         representation(Cliques = "character"))
+         contains = "SimpleList",
+         representation(name = "characterOrNULL",
+                       clique_names = "character",
+                        clique_hashes = "ANY")
+)
 
-#' @rdname CRCView
-#' @export
+CliqueList <- function(clique, ..., name=NULL ) {
+  cliques <- unlist(list(clique, ...))
+  clique_names <- unlist(lapply(cliques,name))
+  clique_hashes <- unlist(lapply(cliques,hash))
+  new("CliqueList", SimpleList(clique, ...),
+      name=name, clique_names = clique_names,
+      clique_hashes = clique_hashes) -> new_clqs
+  names(new_clqs) <- clique_names
+  new_clqs
+}
+
+
+
+# -----------------------------------------------------------------------------
+
+##' @rdname CRCView
+##' @export
 setClass("CRCView",
-         contains = "RangedSummarizedExperiment",
-         representation(name = "character"))
+         contains = "GRanges",
+         representation(colData="DataFrameOrNULL",
+                        name = "characterOrNULL",
+                        cliques = "CliqueList",
+                        tfbs = "GRangesOrNULL",
+                        bam = "characterOrNULL"))
+
+CRCView <- function(subpeaks, cliques, coldata=NULL, prior_tfbs=NULL,
+                    sample=name(cliques), bampath=NULL){
+  new("CRCView", subpeaks, cliques=cliques, colData = coldata,
+      name=sample, tfbs = prior_tfbs, bam=bampath)
+}
+
+
+# -----------------------------------------------------------------------------
+
+##' @rdname CRCViewList
+##' @export
+#setClass("CRCViewList",
+#         contains = "SimpleList",
+#         representation(samples = "character"))
+
+
