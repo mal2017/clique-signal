@@ -13,6 +13,8 @@ Depends:
     SummarizedExperiment,
     magrittr,
 Imports:
+    chromVAR,
+    Rsubread,
     rtracklayer,
     stringr,
     tictoc,

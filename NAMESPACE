@@ -3,6 +3,8 @@
 export(create_coltron_experiment)
 export(import_coltron_sample)
 export(list_to_cliquelist)
+export(quantifyCutsites)
+export(quantifyReads)
 export(read_coltron_cliques)
 export(read_coltron_subpeaks)
 export(read_coltron_tfbs)

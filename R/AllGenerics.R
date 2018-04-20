@@ -15,10 +15,37 @@ setGeneric("extract_cliques", function(object) standardGeneric("extract_cliques"
 setGeneric("unique_cliques", function(object) standardGeneric("unique_cliques"))
 setGeneric("tfbs", function(object) standardGeneric("tfbs"))
 setGeneric("hash", function(clique) standardGeneric("hash"))
+setGeneric("quantsites", function(object) standardGeneric("quantsites"))
 setGeneric("members", function(clique) standardGeneric("members"))
 setGeneric("hashes", function(cliquelist) standardGeneric("hashes"))
+setGeneric("bam", function(object) standardGeneric("bam"))
 
 # set methods -----------------------------------------------------------------
+setMethod("bam",signature(object = "CRCViewList"),
+          function(object) {
+            object %>% lapply(bam)
+          }
+)
+setMethod("bam",signature(object = "CRCView"),
+          function(object) {
+            object@bam
+          }
+)
+
+
+setMethod("quantsites",signature(object = "CRCView"),
+          function(object) {
+            GRanges(object)
+          }
+)
+
+setMethod("quantsites",signature(object = "CRCViewList"),
+          function(object) {
+            object@listData %>% lapply(GRanges) %>% GRangesList
+          }
+)
+
+
 setMethod("tfbs",signature(object = "CRCView"),
           function(object) {
             object@tfbs

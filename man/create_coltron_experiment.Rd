@@ -4,7 +4,8 @@
 \alias{create_coltron_experiment}
 \title{create_coltron_experiment}
 \usage{
-create_coltron_experiment(metadata, quantsites = "SUBPEAKS")
+create_coltron_experiment(metadata, quantsites = "SUBPEAKS",
+  resizeWidth = 500, quantmode = "READS", nthreads = 1)
 }
 \description{
 supply a data.frame containing at least:
@@ -14,4 +15,6 @@ SAMPLE, CONDITION, COLTRONDIR, BAM
 QUANTSITES is an optional field for specifying atac regions to
 search for motifs in and quantify signal. Defaults to coltron's subpeaks
 bed file otherwise.
+QUANTMODE is an optional field for specifying whether to count reads like an atac
+or a chipseq experiment. 'ATAC' or 'READS'.
 }
