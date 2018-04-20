@@ -4,6 +4,7 @@ setClassUnion("GRangesListOrNULL",c("GRangesList","NULL"))
 setClassUnion("GRangesOrNULL",c("GRanges","NULL"))
 setClassUnion("DataFrameOrNULL",c("DataFrame","NULL"))
 
+# -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # classes ---------------------------------------------------------------------
@@ -72,7 +73,7 @@ CliqueList <- function(clique, ..., name=NULL ) {
   cliques <- unlist(list(clique, ...))
   clique_names <- unlist(lapply(cliques,name))
   clique_hashes <- unlist(lapply(cliques,hash))
-  new("CliqueList", SimpleList(clique, ...),
+  new("CliqueList", SimpleList(cliques),
       name=name, clique_names = clique_names,
       clique_hashes = clique_hashes) -> new_clqs
   names(new_clqs) <- clique_names
@@ -87,25 +88,44 @@ CliqueList <- function(clique, ..., name=NULL ) {
 ##' @export
 setClass("CRCView",
          contains = "GRanges",
-         representation(colData="DataFrameOrNULL",
-                        name = "characterOrNULL",
+         representation(name = "characterOrNULL",
                         cliques = "CliqueList",
-                        tfbs = "GRangesOrNULL",
+                        tfbs = "GRangesListOrNULL",
                         bam = "characterOrNULL"))
 
-CRCView <- function(subpeaks, cliques, coldata=NULL, prior_tfbs=NULL,
+CRCView <- function(quantsites, cliques, prior_tfbs=NULL,
                     sample=name(cliques), bampath=NULL){
-  new("CRCView", subpeaks, cliques=cliques, colData = coldata,
+  new("CRCView", quantsites, cliques=cliques,
       name=sample, tfbs = prior_tfbs, bam=bampath)
 }
 
 
 # -----------------------------------------------------------------------------
 
-##' @rdname CRCViewList
-##' @export
-#setClass("CRCViewList",
-#         contains = "SimpleList",
-#         representation(samples = "character"))
+#' @rdname CRCViewList
+#' @export
+setClass("CRCViewList",
+         contains = "SimpleList",
+         representation(samples = "characterOrNULL"))
 
+CRCViewList <- function(crcview, ..., name=NULL ) {
+  crcs <- unlist(list(crcview, ...))
+  crc_names <- unlist(lapply(crcs,name))
+  new("CRCViewList", SimpleList(crcs),
+      samples = crc_names) -> new_crcv
+  names(new_crcv) <- crc_names
+  new_crcv
+}
 
+# -----------------------------------------------------------------------------
+
+#' #' @rdname CRCExperiment
+#' #' @export
+ setClass("CRCExperiment",
+          contains = "RangedSummarizedExperiment",
+          representation(name = "characterOrNULL",
+                         crcs = "CRCViewList"))
+
+CRCExperiment <- function(rse, crclist, cohort = NULL) {
+   new("CRCExperiment", rse, crcs = crclist, name=cohort)
+}

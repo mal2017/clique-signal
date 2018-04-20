@@ -10,10 +10,15 @@ Depends:
     S4Vectors,
     IRanges,
     GenomicRanges,
-    SummarizedExperiment
+    SummarizedExperiment,
+    magrittr,
 Imports:
+    rtracklayer,
+    stringr,
+    tictoc,
     TFBSTools,
     openssl,
+    tidyverse,
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
