@@ -68,6 +68,14 @@ setMethod("tfbs",signature(object = "CRCViewList"),
           }
 )
 
+setMethod("tfbs",signature(object = "CRCExperiment"),
+          function(object) {
+            tfbs(object@crcs)
+          }
+)
+
+
+
 setMethod("unique_cliques",signature(object = "CliqueList"),
           function(object) {
             names(object) %>% unique %>% object[.]
@@ -94,6 +102,13 @@ setMethod("extract_cliques",signature(object = "CRCViewList"),
               lapply(extract_cliques) %>%
               lapply(extract_cliques) %>%
               CliqueList()
+          }
+)
+
+
+setMethod("extract_cliques",signature(object = "CRCExperiment"),
+          function(object) {
+            extract_cliques(object@crcs)
           }
 )
 

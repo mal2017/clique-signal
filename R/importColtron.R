@@ -64,10 +64,14 @@ import_coltron_sample <- function(path, name, bam=NULL) {
 #' QUANTMODE is an optional field for specifying whether to count reads like an atac
 #' or a chipseq experiment. 'ATAC' or 'READS'.
 #'
+#' Result inherits from RangedSummarizedExperiment and is
+#' compatible with regular chromvar workflow.
+#'
 #' @export
 create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
                                       resizeWidth = 1000, quantmode="READS",
-                                      nthreads = 1, cohort_name="Coltron") {
+                                      nthreads = 1, cohort_name="Coltron",
+                                      genome='BSgenome.Hsapiens.UCSC.hg19') {
   stopifnot(class(metadata) == "data.frame")
   fields <- c("SAMPLE", "CONDITION", "COLTRONDIR", "BAM")
   stopifnot(fields %in% colnames(metadata))
@@ -75,7 +79,6 @@ create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
     set_rownames(metadata$SAMPLE) -> metadata
   if (!("QUANTSITES" %in% colnames(metadata))) metadata$QUANTSITES <- quantsites
   metadata$BAM %>% as.vector %>% file.exists() %>% all %>% stopifnot()
-
   vanilla_crcview_list <- list()
   for(i in 1:nrow(metadata)) {
     dir <- as.vector(metadata[i,"COLTRONDIR"])
@@ -98,9 +101,7 @@ create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
     resize(width = resizeWidth, fix="center") %>%
     set_names(.,as.character(.)) %>%
     unique %>% sort
-
   bams <- bam(crcvlist)
-
   message("Quantifying signal...", appendLF = F)
   tictoc::tic()
   capture.output(
@@ -119,17 +120,17 @@ create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
                               rowRanges = all_candidate_sites,
                               colData = metadata[c("CONDITION","depth")])
   metadata(rse) <- metadata
+  message("Finding non-overlapping peaks... ",appendLF = F)
+  tictoc::tic()
   rse %<>% chromVAR::filterPeaks(non_overlapping = T)
-
+  tictoc::toc()
+  message("Adding GC bias... ",appendLF = F)
+  tictoc::tic()
+  rse %<>% addGCBias(genome=genome)
+  tictoc::toc()
   CRCExperiment(rse,crclist = crcvlist, cohort = cohort_name)
 }
 
 
-
-
-
-
-#unique_cliques <- unique_cliques(crcvlist)
-#all_tfbs_grl <- tfbs(crcvlist)
 
 
