@@ -161,7 +161,7 @@ HEME and EPI conditions, I would provide `c("HEME","EPI")` as an argument.
 For the purposes of this demo, we'll just go with the default.
 
 ```{r diff-wrapper}
-diff <- get_diff_cliques(crc, clique_ix)
+diff <- get_diff_cliques(crc, clique_ix, score_type = "z")
 
 names(diff)
 ```
@@ -176,8 +176,21 @@ class object.
 
 ## Plotting
 
-```{r}
+We can create plenty of plots from these results.
 
+```{r}
+plot_cliques(diff,contrast=c("HEME","EPI"), plot="volcano")
+```
+
+
+```{r}
+set.seed(123)
+tsne_results <- deviationsTsne(diff$devObj, threshold = 1.5, perplexity = 10)
+
+tsne_plots <- plotDeviationsTsne(diff$devObj, tsne_results, 
+                                 sample_column = "CONDITION", 
+                                 shiny = FALSE)
+tsne_plots
 ```
 
 ## Recap
@@ -186,7 +199,7 @@ Now we can condense the workflow back - just three lines of R after your
 metadata data.frame is created.
 
 ```{r recap, eval=F}
-crc <- create_coltron_experiment(mdf,nthreads = 16, resizeWidth=1000)
+crc <- create_coltron_experiment(mdf)
 clique_ix <- index_by_clique(crc)
 diff <- get_diff_cliques(crc, clique_ix)
 ```

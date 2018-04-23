@@ -74,14 +74,17 @@ get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE,
 plot_cliques <- function(object, plot=c("volcano","tsne","clustergram"),
                          contrast=NULL) {
   stopifnot(class(object) == "CRCResult")
-  print('yay')
+  if (plot == "volcano") plot_cliques_volcano(object$diffs,contrast=contrast)
 }
 
 #' @import ggplot2
 plot_cliques_volcano <- function(diffs, contrast=NULL) {
   diff_score <- diffs[[contrast[1]]] - diffs[[contrast[2]]]
   toplot <- tibble::tibble(x = diff_score, y= -log10(diffs$padj))
+  lims_x <- abs(toplot$x) %>% max %>% c(-1 * ., .)
+  lims_y <- c(0, 1.2 * max(toplot$y))
   ggplot(toplot, aes(x=x, y=y, color=x)) + geom_point() +
     theme_classic() + geom_hline(yintercept = -log10(0.05),color='darkgray') +
-    scale_color_gradient2(mid = "lightgray", low = "blue",high = "red")
+    scale_color_gradient2(mid = "lightgray", low = "blue",high = "red") +
+    xlim(lims_x) + ylim(lims_y)
 }
