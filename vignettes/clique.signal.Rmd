@@ -49,13 +49,18 @@ library(stringr)
 ```{r, make-meta-df}
 dir <- "~/Dropbox (Partners HealthCare)/sharedWithCollabs/cll-epi-revision/180413-fed-crc/crc/crc/"
 bamdir <- "/Volumes/grail/bam/hg19/roadmap_network/"
-hemesamps <- c('E032','E029','E050')
+hemesamps <- c('E032','E029','E050','E046')
 epsamps <- c('E055','E056','E059')
 muscsamps <- c('E100','E089','E090')
-bams <- paste0(bamdir,c(hemesamps,epsamps,muscsamps),"_H3K27AC.hg19.sorted.bam")
-data.frame(SAMPLE=c(hemesamps, epsamps,muscsamps),
-			CONDITION=c(rep("HEME",3),rep("EPI",3), rep("MUSC",3)),
-			COLTRONDIR=paste0(dir,c(hemesamps,epsamps,muscsamps),"_H3K27AC/"),
+digestsamps <- c('E092','E085','E084','E109','E094')
+esderived <- c('E007','E004','E005','E006')
+escells <- c('E008','E003')
+ipsc <- c("E021","E022")
+
+bams <- paste0(bamdir,c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),"_H3K27AC.hg19.sorted.bam")
+data.frame(SAMPLE=c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),
+			CONDITION=c(rep("HEME",4),rep("EPI",3), rep("MUSC",3),rep("DIG",5),rep('ESder',4),rep('ESC',2),rep("iPSC",2)),
+			COLTRONDIR=paste0(dir,c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),"_H3K27AC/"),
 			BAM=bams) -> mdf
 ```
 
@@ -87,7 +92,7 @@ The quantsites are used as a searchspace for motif finding and signal quantifica
 We can import these data with a single call.
 
 ```{r make-object}
-create_coltron_experiment(mdf,nthreads = 16, resizeWidth=1000) -> crc
+create_coltron_experiment(mdf,nthreads = 20, resizeWidth=2000) -> crc
 ```
 
 This call performs several tasks at once to improve code clarity:
@@ -179,7 +184,7 @@ class object.
 We can create plenty of plots from these results.
 
 ```{r}
-plot_cliques(diff,contrast=c("HEME","EPI"), plot="volcano")
+plot_cliques(diff,contrast=c("HEME","DIG"), plot="volcano")
 ```
 
 
