@@ -61,7 +61,8 @@ setMethod("tfbs",signature(object = "CRCViewList"),
             for (i in 1:length(all_tf_names)) {
               all_tf_names[i] -> idx
               nested_tfbs %>% lapply(`[[`,idx) %>% unlist %>%
-                GRangesList() %>% unlist %>% reduce -> i_tfbs
+                GRangesList() %>% unlist %>%
+                GenomicRanges::reduce() -> i_tfbs
               top_level_tfbs_by_motif[[idx]] <- i_tfbs
             }
             GRangesList(top_level_tfbs_by_motif)
@@ -214,3 +215,12 @@ setMethod("hashes",
    cat("TFBS: ", length(head(names(object@tfbs)))," and ",length(object@tfbs)-6," more","\n")
    cat("Bam: ", object@bam, "\n")
  })
+
+
+setMethod("show","CRCExperiment", function(object) {
+  # print name
+  cat("Class: ", class(object),"\n")
+  cat("Samples: ", length(object@crcs), "\n")
+  cat("Accessible Sites: ", length(object), "\n")
+  cat("Conditions: ", crc@metadata$CONDITION %>% levels, "\n")
+})

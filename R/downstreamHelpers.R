@@ -55,7 +55,7 @@ get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE,
 
   diffs <- tibble::tibble(clique=scores$clique)
   for (i in 1:length(names_by_cond)) {
-    grp_name <- paste0(names(names_by_cond)[i],"_mean_",score_type)
+    grp_name <- names(names_by_cond)[i]
     samples <- names_by_cond[[i]]
     diffs[[grp_name]] <- rowMeans(scores[samples])
   }
@@ -71,7 +71,17 @@ get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE,
 
 #' plot_cliques
 #' @export
-plot_cliques <- function(object, plot=c("volcano","tsne","clustergram"), interactive=F) {
+plot_cliques <- function(object, plot=c("volcano","tsne","clustergram"),
+                         contrast=NULL) {
   stopifnot(class(object) == "CRCResult")
   print('yay')
+}
+
+#' @import ggplot2
+plot_cliques_volcano <- function(diffs, contrast=NULL) {
+  diff_score <- diffs[[contrast[1]]] - diffs[[contrast[2]]]
+  toplot <- tibble::tibble(x = diff_score, y= -log10(diffs$padj))
+  ggplot(toplot, aes(x=x, y=y, color=x)) + geom_point() +
+    theme_classic() + geom_hline(yintercept = -log10(0.05),color='darkgray') +
+    scale_color_gradient2(mid = "lightgray", low = "blue",high = "red")
 }

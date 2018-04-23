@@ -41,15 +41,13 @@ read_coltron_tfbs <- function(path) {
 #' @export
 import_coltron_sample <- function(path, name, bam=NULL) {
   if (!file.exists(path)) stop("This COLTRON directory doesn't exist.")
-  message(paste0("Importing ", name, "... "),appendLF = F)
-  tictoc::tic()
+  message(paste0("Importing ", name, "... "))
   subpeaks <- read_coltron_subpeaks(path)
   cliques <- read_coltron_cliques(path)
   tfbs <- read_coltron_tfbs(path)
 
   crcv <- CRCView(subpeaks, cliques, prior_tfbs=tfbs,
                   sample=name, bampath=bam)
-  tictoc::toc()
   return(crcv)
 }
 
@@ -90,48 +88,37 @@ create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
       if(!file.exists(qs)) stop("QUANTSITE: Use existing .bed or default.")
       qs_gr <- rtracklayer::import(qs)
       CRCView(qs_gr, crcv@cliques, prior_tfbs=crcv@tfbs,
-                          sample=crcv@name, bampath=crcv@bam) -> crcv
+              sample=crcv@name, bampath=crcv@bam) -> crcv
     }
     vanilla_crcview_list <- list(vanilla_crcview_list,crcv)
   }
   crcvlist <- CRCViewList(vanilla_crcview_list)
-
   all_candidate_sites <- quantsites(crcvlist) %>%
     unlist %>%
     resize(width = resizeWidth, fix="center") %>%
-    set_names(.,as.character(.)) %>%
+    magrittr::set_names(.,as.character(.)) %>%
     unique %>% sort
   bams <- bam(crcvlist)
-  message("Quantifying signal...", appendLF = F)
-  tictoc::tic()
+  message("Quantifying signal...")
   capture.output(
-  if (quantmode=="ATAC") {
-    quantifyCutsites(all_candidate_sites,
-                     bamlist = bams, nthreads =  nthreads)  -> cts
-  } else {
-    quantifyReads(all_candidate_sites,
-                     bamlist = bams, nthreads =  nthreads)  -> cts
-  },
-  file="/dev/null")
-  tictoc::toc()
+    if (quantmode=="ATAC") {
+      quantifyCutsites(all_candidate_sites,
+                       bamlist = bams, nthreads =  nthreads)  -> cts
+    } else {
+      quantifyReads(all_candidate_sites,
+                    bamlist = bams, nthreads =  nthreads)  -> cts
+    },
+    file="/dev/null")
   colnames(cts) <- names(bams)
   metadata$depth <- colSums(cts)
   rse <- SummarizedExperiment(assays = list(counts=cts),
                               rowRanges = all_candidate_sites,
                               colData = metadata[c("CONDITION","depth")])
   metadata(rse) <- metadata
-  message("Finding non-overlapping peaks... ",appendLF = F)
-  tictoc::tic()
+  message("Finding non-overlapping peaks... ")
   rse %<>% GenomeInfoDb::sortSeqlevels() %>% sort %>%
     chromVAR::filterPeaks(non_overlapping = T)
-  tictoc::toc()
-  message("Adding GC bias... ",appendLF = F)
-  tictoc::tic()
+  message("Adding GC bias... ")
   rse %<>% chromVAR::addGCBias(genome=genome)
-  tictoc::toc()
   CRCExperiment(rse, crclist = crcvlist, cohort = cohort_name)
 }
-
-
-
-

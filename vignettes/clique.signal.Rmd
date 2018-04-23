@@ -1,0 +1,198 @@
+---
+title: "Differential TF clique accessibility with coltron and chromVAR"
+author: "Matt Lawlor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Housekeeping
+
+This package is designed to import and compare results from
+[coltron](https://pypi.org/project/coltron/), a tool for predicting 
+transription factor networks from histone modification ChIP-seq data.
+
+The engine behind this approach is the excellent [chromVAR](https://www.nature.com/articles/nmeth.4401) package.
+
+While this package is intended to import and analyze coltron results, coltron itself 
+is not a dependency. This package has relatively few dependencies and most 
+are fairly standard R packages. If you use bioconductor and tidyverse, 
+you probably have most of them installed already!
+
+Also, this will only work for a pristine coltron output directory!
+
+## Importing coltron results
+
+Coltron predicts networks from single samples, but we want to 
+compare many coltron runs efficiently.
+
+We start by creating a data.frame holding all of the metadata we'll need.
+
+```{r load-libraries, message=FALSE, warning=FALSE}
+devtools::load_all()
+library(chromVAR, quietly = T)
+library(tidyverse, quietly = T)
+library(tibble)
+library(stringr)
+```
+
+```{r, make-meta-df}
+dir <- "~/Dropbox (Partners HealthCare)/sharedWithCollabs/cll-epi-revision/180413-fed-crc/crc/crc/"
+bamdir <- "/Volumes/grail/bam/hg19/roadmap_network/"
+hemesamps <- c('E032','E029','E050')
+epsamps <- c('E055','E056','E059')
+muscsamps <- c('E100','E089','E090')
+bams <- paste0(bamdir,c(hemesamps,epsamps,muscsamps),"_H3K27AC.hg19.sorted.bam")
+data.frame(SAMPLE=c(hemesamps, epsamps,muscsamps),
+			CONDITION=c(rep("HEME",3),rep("EPI",3), rep("MUSC",3)),
+			COLTRONDIR=paste0(dir,c(hemesamps,epsamps,muscsamps),"_H3K27AC/"),
+			BAM=bams) -> mdf
+```
+
+Above, we've created a data.frame for 9 coltron runs from three different
+groups. We can take a look inside to get a sense of how to set this up.
+
+```{r explain-meta-df, echpo=F}
+mdf %>% 
+  lapply(as.vector) %>% 
+  lapply(stringr::str_trunc, width=15) %>%
+  data.frame() %>%
+  knitr::kable()
+```
+
+You are required to provide the following fields:
+
+* SAMPLE: Sample name.
+* CONDITION: The condition variable for downstream analysis.
+* COLTRONDIR: A pristine coltron output directory.
+* BAM: The bam containing reads you'll use for signal quantification.
+
+There is another possible column called QUANTSITES, 
+which by default is a character vector of length 1: "SUBPEAK." This
+default setting imports the *subpeaks.bed file from the coltron directory.
+
+Optionally, you can specify a bed file for each sample in the QUANTSITES field.
+The quantsites are used as a searchspace for motif finding and signal quantification.
+
+We can import these data with a single call.
+
+```{r make-object}
+create_coltron_experiment(mdf,nthreads = 16, resizeWidth=1000) -> crc
+```
+
+This call performs several tasks at once to improve code clarity:
+
+1. Imports data from the coltron directory.
+1. calls Rsubread::featureCounts to quantify signal across regions identified in all of your 
+*subpeaks.bed files or the quantsites you specify.
+1. Chooses non-overlapping peaks.
+1. Adds a GC bias offset for use with the chromVAR workflow.
+
+## CRCExperiment Object
+
+```{r show-crc-class}
+crc
+```
+
+The object returned is a CRCExperiment, which holds a 
+RangedSummarizedExperiment and a CRCViewList. The CRCViewList
+holds instances of all of the other special classes defined for this package.
+
+1. TranscriptionFactor
+1. Clique
+1. CliqueList
+1. CRCView
+
+These classes are defined so we can keep track and take advantage of
+inheritance fromstandard bioconductor classes like 
+GRanges and SummarizedExperiment while keeping track of which samples
+all of the cliques and tfbs were originally discovered in.
+
+The CRCExperiment inherits from RangedSummarizedExperiment.
+
+## Alternative Workflow Branch Point
+
+If you just wish to import the cliques or tfbs found by coltron, 
+you are now free to use this object in a chromVAR workflow just like you 
+would a normal RangedSummarizedExperiment.
+
+**IMPORTANT** 
+*I have not implemented a helper for clique level analysis via
+motifMatchr, but this is coming and should be easy.*
+
+## clique.signal Workflow
+ 
+Once we have the CRCExperiment object, we can assign individual motifs to
+cliques and index the ranges of the CRCExperiment by clique.
+
+```{r ix}
+clique_ix <- index_by_clique(crc)
+```
+
+This index takes the form of a sparse logical matrix, just like
+the indices explained in chromVAR's vignette.
+
+```{r show-ix}
+clique_ix[1:2,1:2] %>% as.matrix %>% knitr::kable()
+```
+
+Lastly, we can call a helper function to run chromVAR's built-in
+differential analysis functions in a way that makes sense for us.
+Additionally, this helper aggregates results in ways that I often
+use for downstream analysis. I've tried to avoid reinventing the wheel
+too much - the differential testing is based on chromVAR's helper function
+and will test as many conditions at once as you provide conditions.
+
+However, sometimes we want to contrast just two groups with higher sensitivity.
+For these situations, we could specify a `contrast`, where the argument is
+a character vector of length 2. For example, if I wanted to directly compare
+HEME and EPI conditions, I would provide `c("HEME","EPI")` as an argument.
+
+For the purposes of this demo, we'll just go with the default.
+
+```{r diff-wrapper}
+diff <- get_diff_cliques(crc, clique_ix)
+
+names(diff)
+```
+`diff` is an S3 object of class `CRCResult` with 3 slots.
+Slot `diff` holds mean deviations (or mean deviation z-scores)
+and adjusted p-values. Slot `scores` holds either deviations or z-scores,
+depending on what you specified when calling `get_diff_cliques`. Slot `devObj`
+holds the ChromVARDevations object used to generate the other tables. Any of these can of
+course be discarded as necessary, but downstream plotters in this package
+require some or all of these slots to function, and thus require a `CRCResult`
+class object.
+
+## Plotting
+
+```{r}
+
+```
+
+## Recap
+
+Now we can condense the workflow back - just three lines of R after your
+metadata data.frame is created.
+
+```{r recap, eval=F}
+crc <- create_coltron_experiment(mdf,nthreads = 16, resizeWidth=1000)
+clique_ix <- index_by_clique(crc)
+diff <- get_diff_cliques(crc, clique_ix)
+```
+
+
+## Session Info
+```{r}
+sessionInfo()
+```
