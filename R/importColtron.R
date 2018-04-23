@@ -122,13 +122,14 @@ create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
   metadata(rse) <- metadata
   message("Finding non-overlapping peaks... ",appendLF = F)
   tictoc::tic()
-  rse %<>% chromVAR::filterPeaks(non_overlapping = T)
+  rse %<>% GenomeInfoDb::sortSeqlevels() %>% sort %>%
+    chromVAR::filterPeaks(non_overlapping = T)
   tictoc::toc()
   message("Adding GC bias... ",appendLF = F)
   tictoc::tic()
-  rse %<>% addGCBias(genome=genome)
+  rse %<>% chromVAR::addGCBias(genome=genome)
   tictoc::toc()
-  CRCExperiment(rse,crclist = crcvlist, cohort = cohort_name)
+  CRCExperiment(rse, crclist = crcvlist, cohort = cohort_name)
 }
 
 

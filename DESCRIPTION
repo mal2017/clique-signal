@@ -14,9 +14,12 @@ Depends:
     magrittr,
 Imports:
     chromVAR,
+    dplyr,
+    GenomeInfoDb,
     Rsubread,
     rtracklayer,
     stringr,
+    tibble,
     tictoc,
     TFBSTools,
     openssl,
