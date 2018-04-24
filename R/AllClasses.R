@@ -1,15 +1,20 @@
+# -----------------------------------------------------------------------------
 # unionClasses ----------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 setClassUnion("characterOrNULL",c("character","NULL"))
 setClassUnion("GRangesListOrNULL",c("GRangesList","NULL"))
 setClassUnion("GRangesOrNULL",c("GRanges","NULL"))
 setClassUnion("DataFrameOrNULL",c("DataFrame","NULL"))
 
 # -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
 # classes ---------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+#' A class for holding Transcription Factors.
+#'
+#' Holds a name and a PWMatrixList, which can be empty.
+#'
 #' @rdname TranscriptionFactor
 #' @export
 setClass("TranscriptionFactor",
@@ -27,14 +32,13 @@ TranscriptionFactor <- function(name, pwms = NULL) {
   new("TranscriptionFactor",name = name, pwms = pwmlist)
 }
 
-
-
-
-
-
-
 # -----------------------------------------------------------------------------
 
+#' A class for holding groups of TranscriptionFactor objects.
+#'
+#' Contains at least one TranscriptionFactor object, as well as
+#' a list of names of contained TF instances.
+#'
 #' @rdname Clique
 #' @export
 setClass("Clique",
@@ -57,9 +61,10 @@ Clique <- function(tf, ..., name = NULL) {
   new("Clique", new_clique, members = members, hash = hash)
 }
 
-
 # -----------------------------------------------------------------------------
 
+#' A class for holding groups of Clique objects.
+#'
 #' @rdname CliqueList
 #' @export
 setClass("CliqueList",
@@ -80,12 +85,17 @@ CliqueList <- function(clique, ..., name=NULL ) {
   new_clqs
 }
 
-
-
 # -----------------------------------------------------------------------------
 
-##' @rdname CRCView
-##' @export
+#' A class for holding a representation of a single sample's predicted
+#' network.
+#'
+#' Contains a GRanges object holding accessible regions for downstream consideration.
+#' Additionally may contain a name, a CliqueList, all predicted TFBS, and a path
+#' to a bam used for quantification.
+#'
+#' @rdname CRCView
+#' @export
 setClass("CRCView",
          contains = "GRanges",
          representation(name = "characterOrNULL",
@@ -93,21 +103,26 @@ setClass("CRCView",
                         tfbs = "GRangesListOrNULL",
                         bam = "characterOrNULL"))
 
+#' @rdname CRCView
+#' @export
 CRCView <- function(quantsites, cliques, prior_tfbs=NULL,
                     sample=name(cliques), bampath=NULL){
   new("CRCView", quantsites, cliques=cliques,
       name=sample, tfbs = prior_tfbs, bam=bampath)
 }
 
-
 # -----------------------------------------------------------------------------
 
+#' A class for holding a list of CRCViews.
+#'
 #' @rdname CRCViewList
 #' @export
 setClass("CRCViewList",
          contains = "SimpleList",
          representation(samples = "characterOrNULL"))
 
+#' @rdname CRCViewList
+#' @export
 CRCViewList <- function(crcview, ..., name=NULL ) {
   crcs <- unlist(list(crcview, ...))
   crc_names <- unlist(lapply(crcs,name))
@@ -119,13 +134,18 @@ CRCViewList <- function(crcview, ..., name=NULL ) {
 
 # -----------------------------------------------------------------------------
 
-#' #' @rdname CRCExperiment
-#' #' @export
+#' A class for containing the full representation of a cohort's coltron
+#' results.
+#'
+#' @rdname CRCExperiment
+#' @export
  setClass("CRCExperiment",
           contains = "RangedSummarizedExperiment",
           representation(name = "characterOrNULL",
                          crcs = "CRCViewList"))
 
+#' @rdname CRCExperiment
+#' @export
 CRCExperiment <- function(rse, crclist, cohort = NULL) {
    new("CRCExperiment", rse, crcs = crclist, name=cohort)
 }

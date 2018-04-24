@@ -2,10 +2,16 @@
 % Please edit documentation in R/importColtron.R
 \name{read_coltron_cliques}
 \alias{read_coltron_cliques}
-\title{read_coltron_cliques}
+\title{Import the cliques from a coltron run.}
 \usage{
 read_coltron_cliques(path)
 }
+\arguments{
+\item{path}{A path to a coltron output directory.}
+}
+\value{
+CliqueList object
+}
 \description{
-read_coltron_cliques
+Usually not run by user.
 }

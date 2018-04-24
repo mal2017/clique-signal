@@ -1,4 +1,9 @@
-#' read_coltron_cliques
+#' Import the cliques from a coltron run.
+#'
+#' Usually not run by user.
+#'
+#' @param path A path to a coltron output directory.
+#' @return CliqueList object
 #' @export
 read_coltron_cliques <- function(path) {
   clique_file <- Sys.glob(paste0(path,"/*CLIQUES_ALL.txt"))
@@ -12,7 +17,12 @@ read_coltron_cliques <- function(path) {
 }
 
 
-#' read_coltron_subpeaks
+#' Import subpeak regions from a coltron run.
+#'
+#' Usually not run by user.
+#'
+#' @param path A path to a coltron output directory.
+#' @return GRanges object.
 #' @export
 read_coltron_subpeaks <- function(path) {
   subpeak_file <- Sys.glob(paste0(path,"/*subpeaks.bed"))
@@ -21,7 +31,12 @@ read_coltron_subpeaks <- function(path) {
 }
 
 
-#' read_coltron_tfbs
+#' Import tfbs regions from a coltron run.
+#'
+#' Usually not run by user.
+#'
+#' @param path A path to a coltron output directory.
+#' @return GRangesList object.
 #' @export
 read_coltron_tfbs <- function(path) {
   motif_files <- Sys.glob(paste0(path,"/motifBED/*motifs.bed"))
@@ -37,7 +52,14 @@ read_coltron_tfbs <- function(path) {
     GRangesList
 }
 
-#' import_coltron_sample
+#' Import a coltron results directory.
+#'
+#' Usually not run by user.
+#'
+#' @param path A path to a coltron output directory.
+#' @param name A sample identifier string.
+#' @param bam A path to a bam.
+#' @return CRCView object
 #' @export
 import_coltron_sample <- function(path, name, bam=NULL) {
   if (!file.exists(path)) stop("This COLTRON directory doesn't exist.")
@@ -51,20 +73,30 @@ import_coltron_sample <- function(path, name, bam=NULL) {
   return(crcv)
 }
 
-#' create_coltron_experiment
+#' Import a set of coltron samples.
 #'
-#' supply a data.frame containing at least:
-#' SAMPLE, CONDITION, COLTRONDIR, BAM
+#' User supplies a data.frame containing at least the following
+#' columns:
+#' SAMPLE, CONDITION, COLTRONDIR, BAM.
 #'
 #' QUANTSITES is an optional field for specifying atac regions to
 #' search for motifs in and quantify signal. Defaults to coltron's subpeaks
-#' bed file otherwise.
+#' bed file.
+#'
 #' QUANTMODE is an optional field for specifying whether to count reads like an atac
 #' or a chipseq experiment. 'ATAC' or 'READS'.
 #'
-#' Result inherits from RangedSummarizedExperiment and is
-#' compatible with regular chromvar workflow.
+#' Returns a CRCExperiment, which inherits from RangedSummarizedExperiment and is
+#' compatible with the regular chromVAR workflow as well as clique level analysis.
 #'
+#' @param metadata data.frame with sample metadata.
+#' @param quantsites Default to subpeaks file in coltron directories. Else paths to bed files.
+#' @param resizeWidth Width to resize subpeaks to.
+#' @param quantmode 'READS': Full read overlap; 'ATAC': 5' cut sites.
+#' @param nthreads Number of threads to use for read quant. Passed to Rsubread::featureCounts.
+#' @param cohort_name Name for experiment group.
+#' @param genome String name of a BSgenome, used for GC bias addition.
+#' @return CRCExperiment object.
 #' @export
 create_coltron_experiment <- function(metadata, quantsites="SUBPEAKS",
                                       resizeWidth = 1000, quantmode="READS",

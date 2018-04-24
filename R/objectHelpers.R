@@ -1,4 +1,6 @@
-#' list_to_cliquelist
+#' Convert list of lists containing TF names to a CliqueList.
+#'
+#' @param cliques A list of character vectors.
 #' @export
 list_to_cliquelist <- function(cliques) {
   vanilla_clique_to_cliquelist <- function(x) {
@@ -8,7 +10,8 @@ list_to_cliquelist <- function(cliques) {
     CliqueList()
 }
 
-#' tfbs_by_clique
+#' Group TFBS  by clique.
+#'
 #' @export
 tfbs_by_clique <- function(object) {
   tfbs_by_tf <- tfbs(object)

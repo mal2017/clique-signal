@@ -17,5 +17,5 @@ quantifyReads(gr, bamlist, nthreads = 8)
 A matrix holding count data with axes regions x samples.
 }
 \description{
-Name sort the bams or this will take a long time.
+Suitable for NGS in general.
 }

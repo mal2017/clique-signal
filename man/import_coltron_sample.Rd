@@ -2,10 +2,20 @@
 % Please edit documentation in R/importColtron.R
 \name{import_coltron_sample}
 \alias{import_coltron_sample}
-\title{import_coltron_sample}
+\title{Import a coltron results directory.}
 \usage{
 import_coltron_sample(path, name, bam = NULL)
 }
+\arguments{
+\item{path}{A path to a coltron output directory.}
+
+\item{name}{A sample identifier string.}
+
+\item{bam}{A path to a bam.}
+}
+\value{
+CRCView object
+}
 \description{
-import_coltron_sample
+Usually not run by user.
 }

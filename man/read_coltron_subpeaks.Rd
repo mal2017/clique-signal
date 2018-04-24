@@ -2,10 +2,16 @@
 % Please edit documentation in R/importColtron.R
 \name{read_coltron_subpeaks}
 \alias{read_coltron_subpeaks}
-\title{read_coltron_subpeaks}
+\title{Import subpeak regions from a coltron run.}
 \usage{
 read_coltron_subpeaks(path)
 }
+\arguments{
+\item{path}{A path to a coltron output directory.}
+}
+\value{
+GRanges object.
+}
 \description{
-read_coltron_subpeaks
+Usually not run by user.
 }

@@ -2,10 +2,16 @@
 % Please edit documentation in R/importColtron.R
 \name{read_coltron_tfbs}
 \alias{read_coltron_tfbs}
-\title{read_coltron_tfbs}
+\title{Import tfbs regions from a coltron run.}
 \usage{
 read_coltron_tfbs(path)
 }
+\arguments{
+\item{path}{A path to a coltron output directory.}
+}
+\value{
+GRangesList object.
+}
 \description{
-read_coltron_tfbs
+Usually not run by user.
 }

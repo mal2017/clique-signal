@@ -1,4 +1,7 @@
-#' index_by_clique
+#' Index a CRCExperiment ranges by clique motif presence.
+#'
+#' @param object A CRCExperiment object.
+#' @return A sparse Matrix holding clique motif presence/absence.
 #' @export
 index_by_clique <- function(object) {
   stopifnot(class(object) == "CRCExperiment")
@@ -16,14 +19,22 @@ index_by_clique <- function(object) {
   Matrix::Matrix(mat, sparse=T)
 }
 
-#' get_diff_cliques
-#' Supply a CRCExperiment, and index matrix. Other params passed
-#' to chromVAR::differentialDeviations()
-#
+#' Run differential analysis at the clique level.
+#'
+#' Supply a CRCExperiment, and index matrix.
+#'
+#' See \link[chromVAR]{computeDeviations}.
+#' See \link[chromVAR]{differentialDeviations}.
+#'
+#' @param object A CRCExperiment object.
+#' @param ix A logical matrix holding clique index information.
+#' @param contrast Optionally provide vector containing 2 levels of metadata CONDITION.
+#' @param parametric Passed to \link[chromVAR]{differentialDeviations}.
+#' @param score_type Use chromVAR's deviations or deviation z-scores as metric for results table.
+#' @return S3 object of class CRCResult, a list holding means+pvalues, sample scores, and a chromVARdeviations object.
 #' @export
 get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE,
-                             score_type = c("dev","z"),
-                             return = c("tibble","all")) {
+                             score_type = c("dev","z")) {
   score_type <- score_type[1]
   return <- return[1]
   stopifnot(nrow(object) == nrow(ix))
@@ -70,7 +81,13 @@ get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE,
 }
 
 
-#' plot_cliques
+#' Plotting helper for CRCResult object.
+#'
+#' @param object An object of class CRCResult.
+#' @param plot A string specifying the type of plot to produce. Only 'volcano' implemented for now.
+#' @param contrast A vector containing the 2 levels of CONDITION to compare.
+#' @param use.adjusted.p Logical specifying whether to use adjusted or non-adjusted p-values for plotting.
+#' @return ggplot2 object.
 #' @export
 plot_cliques <- function(object, plot=c("volcano","tsne","clustergram"),
                          contrast=NULL, use.adjusted.p = F) {

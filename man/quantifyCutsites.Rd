@@ -2,7 +2,7 @@
 % Please edit documentation in R/quantification.R
 \name{quantifyCutsites}
 \alias{quantifyCutsites}
-\title{Suitable for ATAC-seq or DNase-seq.}
+\title{Quantify reads in ATAC-seq or DNase-seq bams.}
 \usage{
 quantifyCutsites(gr, bamlist, nthreads = 8)
 }
@@ -17,5 +17,5 @@ quantifyCutsites(gr, bamlist, nthreads = 8)
 A matrix holding count data with axes regions x samples.
 }
 \description{
-Name sort the bams or this will take a long time.
+Quantify reads in ATAC-seq or DNase-seq bams.
 }

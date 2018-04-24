@@ -1,6 +1,4 @@
-#' Suitable for ATAC-seq or DNase-seq.
-#'
-#' Name sort the bams or this will take a long time.
+#' Quantify reads in ATAC-seq or DNase-seq bams.
 #'
 #' @param gr GRanges object with the regions to quantify.
 #' @param bamlist Preferably a named list holding bam file paths, or a character vector.
@@ -32,8 +30,6 @@ quantifyCutsites <- function(gr, bamlist, nthreads = 8) {
 }
 
 #' Suitable for NGS in general.
-#'
-#' Name sort the bams or this will take a long time.
 #'
 #' @param gr GRanges object with the regions to quantify.
 #' @param bamlist Preferably a named list holding bam file paths, or a character vector.
