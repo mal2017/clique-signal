@@ -92,7 +92,7 @@ The quantsites are used as a searchspace for motif finding and signal quantifica
 We can import these data with a single call.
 
 ```{r make-object}
-create_coltron_experiment(mdf,nthreads = 20, resizeWidth=2000) -> crc
+create_coltron_experiment(mdf[1:6,],nthreads = 20, resizeWidth=2000) -> crc
 ```
 
 This call performs several tasks at once to improve code clarity:

@@ -32,25 +32,24 @@ index_by_clique <- function(object) {
 #' @param score_type Use chromVAR's deviations or deviation z-scores as metric for results table.
 #' @return S3 object of class CRCResult, a list holding means+pvalues, sample scores, and a chromVARdeviations object.
 #' @export
-get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE, score_type = c("dev", 
+get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE, score_type = c("dev",
     "z")) {
     score_type <- score_type[1]
-    return <- return[1]
     stopifnot(nrow(object) == nrow(ix))
     stopifnot(length(contrast) == 2 | is.null(contrast))
-    
+
     if (!is.null(contrast)) {
         object <- object[, object$CONDITION %in% contrast]
     }
-    
+
     colData(object) <- droplevels(colData(object))
     message("Computing deviations via chromVAR... ", appendLF = F)
     tictoc::tic()
     dev <- chromVAR::computeDeviations(object, annotations = ix)
-    diff_dev <- chromVAR::differentialDeviations(dev, groups = "CONDITION", alternative = "two.sided", 
+    diff_dev <- chromVAR::differentialDeviations(dev, groups = "CONDITION", alternative = "two.sided",
         parametric = parametric)
     tictoc::toc()
-    
+
     if (score_type == "dev") {
         scores <- chromVAR::deviations(dev)
         scores <- tibble::as_tibble(scores, rownames = "clique")
@@ -58,16 +57,16 @@ get_diff_cliques <- function(object, ix, contrast = NULL, parametric = TRUE, sco
         scores <- chromVAR::deviationScores(dev)
         scores <- tibble::as_tibble(scores, rownames = "clique")
     }
-    
+
     names_by_cond <- split(rownames(colData(object)), colData(object)$CONDITION)
-    
+
     diffs <- tibble::tibble(clique = scores$clique)
     for (i in 1:length(names_by_cond)) {
         grp_name <- names(names_by_cond)[i]
         samples <- names_by_cond[[i]]
         diffs[[grp_name]] <- rowMeans(scores[samples])
     }
-    
+
     diffs$padj <- diff_dev$p_value_adjusted
     diffs$pval <- diff_dev$p_value
     res <- list(diffs = diffs, scores = scores, devObj = dev)
@@ -104,7 +103,7 @@ plot_cliques_volcano <- function(diffs, p, contrast = NULL) {
     toplot <- tibble::tibble(x = diff_score, y = -log10(diffs[[p]]))
     lims_x <- abs(toplot$x) %>% max %>% c(-1 * ., .)
     lims_y <- c(0, 1.2 * max(toplot$y))
-    ggplot(toplot, aes(x = x, y = y, color = x)) + geom_point() + theme_classic() + geom_hline(yintercept = -log10(0.05), 
-        color = "darkgray") + scale_color_gradient2(mid = "lightgray", low = "blue", high = "red") + 
+    ggplot(toplot, aes(x = x, y = y, color = x)) + geom_point() + theme_classic() + geom_hline(yintercept = -log10(0.05),
+        color = "darkgray") + scale_color_gradient2(mid = "lightgray", low = "blue", high = "red") +
         xlim(lims_x) + ylim(lims_y)
 }
