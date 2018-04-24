@@ -9,9 +9,16 @@ setClassUnion("DataFrameOrNULL", c("DataFrame", "NULL"))
 #' Holds a name and a PWMatrixList, which can be empty.
 #'
 #' @rdname TranscriptionFactor
+#' @slot name Name for the TF
+#' @slot pwms PWMatrixList. Defined in TFBSTools.
 #' @export
 setClass("TranscriptionFactor", representation(name = "character", pwms = "PWMatrixList"))
 
+#' @rdname TranscriptionFactor
+#'
+#' @param name A name for the TranscriptionFactor.
+#' @param pwms Optionally a PWMatrixList object.
+#' @export
 TranscriptionFactor <- function(name, pwms = NULL) {
     if (is.null(pwms)) {
         pwmlist <- TFBSTools::PWMatrixList()
@@ -34,6 +41,12 @@ TranscriptionFactor <- function(name, pwms = NULL) {
 #' @export
 setClass("Clique", contains = "TranscriptionFactor", representation(members = "character", hash = "ANY"))
 
+#' @rdname Clique
+#'
+#' @param tf TranscriptionFactor object.
+#' @param ... more TranscriptionFactor objects.
+#' @param name A name for the clique.
+#' @export
 Clique <- function(tf, ..., name = NULL) {
     others <- list(...)
     tfs <- c(tf, others)
@@ -55,14 +68,19 @@ Clique <- function(tf, ..., name = NULL) {
 #'
 #' @rdname CliqueList
 #' @export
-setClass("CliqueList", contains = "SimpleList", representation(name = "characterOrNULL", clique_names = "character", 
+setClass("CliqueList", contains = "SimpleList", representation(name = "characterOrNULL", clique_names = "character",
     clique_hashes = "ANY"))
 
+#' @rdname CliqueList
+#' @param clique Clique object.
+#' @param ... more Clique objects.
+#' @param name Sample name.
+#' @export
 CliqueList <- function(clique, ..., name = NULL) {
     cliques <- unlist(list(clique, ...))
     clique_names <- unlist(lapply(cliques, name))
     clique_hashes <- unlist(lapply(cliques, hash))
-    new_clqs <- new("CliqueList", SimpleList(cliques), name = name, clique_names = clique_names, 
+    new_clqs <- new("CliqueList", SimpleList(cliques), name = name, clique_names = clique_names,
         clique_hashes = clique_hashes)
     names(new_clqs) <- clique_names
     new_clqs
@@ -79,10 +97,15 @@ CliqueList <- function(clique, ..., name = NULL) {
 #'
 #' @rdname CRCView
 #' @export
-setClass("CRCView", contains = "GRanges", representation(name = "characterOrNULL", cliques = "CliqueList", 
+setClass("CRCView", contains = "GRanges", representation(name = "characterOrNULL", cliques = "CliqueList",
     tfbs = "GRangesListOrNULL", bam = "characterOrNULL"))
 
 #' @rdname CRCView
+#' @param quantsites GRanges object.
+#' @param cliques CliqueList object.
+#' @param prior_tfbs Optional GrangesList of predicted TFBS.
+#' @param sample Sample name.
+#' @param bampath Path to bam for quantification.
 #' @export
 CRCView <- function(quantsites, cliques, prior_tfbs = NULL, sample = name(cliques), bampath = NULL) {
     new("CRCView", quantsites, cliques = cliques, name = sample, tfbs = prior_tfbs, bam = bampath)
@@ -97,6 +120,9 @@ CRCView <- function(quantsites, cliques, prior_tfbs = NULL, sample = name(clique
 setClass("CRCViewList", contains = "SimpleList", representation(samples = "characterOrNULL"))
 
 #' @rdname CRCViewList
+#' @param crcview A CRCView object.
+#' @param ... More CRCView Objects.
+#' @param name A name for the cohort.
 #' @export
 CRCViewList <- function(crcview, ..., name = NULL) {
     crcs <- unlist(list(crcview, ...))
@@ -113,10 +139,14 @@ CRCViewList <- function(crcview, ..., name = NULL) {
 #'
 #' @rdname CRCExperiment
 #' @export
-setClass("CRCExperiment", contains = "RangedSummarizedExperiment", representation(name = "characterOrNULL", 
+setClass("CRCExperiment", contains = "RangedSummarizedExperiment", representation(name = "characterOrNULL",
     crcs = "CRCViewList"))
 
 #' @rdname CRCExperiment
+#'
+#' @param rse A RangedSummarizedExperiment object.
+#' @param crclist A CRCList object.
+#' @param cohort Optional name for experimental group.
 #' @export
 CRCExperiment <- function(rse, crclist, cohort = NULL) {
     new("CRCExperiment", rse, crcs = crclist, name = cohort)

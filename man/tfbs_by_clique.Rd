@@ -6,6 +6,9 @@
 \usage{
 tfbs_by_clique(object)
 }
+\arguments{
+\item{object}{A CRCExperiment, CRCViewList, or CRCView object.}
+}
 \description{
 Group TFBS  by clique.
 }

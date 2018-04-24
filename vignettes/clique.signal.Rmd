@@ -39,11 +39,13 @@ compare many coltron runs efficiently.
 We start by creating a data.frame holding all of the metadata we'll need.
 
 ```{r load-libraries, message=FALSE, warning=FALSE}
-devtools::load_all()
+library(clique.signal)
 library(chromVAR, quietly = T)
-library(tidyverse, quietly = T)
-library(tibble)
-library(stringr)
+library(Matrix, quietly = T)
+library(dplyr, quietly = T)
+library(magrittr, quietly = T)
+library(tibble, quietly = T)
+library(stringr, quietly = T)
 ```
 
 ```{r, make-meta-df}
@@ -54,20 +56,32 @@ epsamps <- c('E055','E056','E059')
 muscsamps <- c('E100','E089','E090')
 digestsamps <- c('E092','E085','E084','E109','E094')
 esderived <- c('E007','E004','E005','E006')
-escells <- c('E008','E003')
-ipsc <- c("E021","E022")
+escells <- c('E008','E003') # i will use these downstream
+ipsc <- c("E021","E022") # i will use these downstream
 
-bams <- paste0(bamdir,c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),"_H3K27AC.hg19.sorted.bam")
-data.frame(SAMPLE=c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),
-			CONDITION=c(rep("HEME",4),rep("EPI",3), rep("MUSC",3),rep("DIG",5),rep('ESder',4),rep('ESC',2),rep("iPSC",2)),
-			COLTRONDIR=paste0(dir,c(hemesamps, epsamps,muscsamps,digestsamps,esderived,escells,ipsc),"_H3K27AC/"),
+bams <- paste0(bamdir,c(hemesamps,epsamps,muscsamps,digestsamps,
+                        esderived,escells,ipsc),"_H3K27AC.hg19.sorted.bam")
+data.frame(SAMPLE=c(hemesamps, epsamps,muscsamps,digestsamps,esderived,
+                    escells,ipsc),
+			CONDITION=c(rep("HEME",4),rep("EPI",3),rep("MUSC",3),
+			            rep("DIG",5),rep('ESder',4),rep('ESC',2),rep("iPSC",2)),
+			COLTRONDIR=paste0(dir,c(hemesamps,epsamps,muscsamps,digestsamps,
+			                        esderived,escells,ipsc),"_H3K27AC/"),
 			BAM=bams) -> mdf
 ```
 
 Above, we've created a data.frame for 9 coltron runs from three different
 groups. We can take a look inside to get a sense of how to set this up.
 
-```{r explain-meta-df, echpo=F}
+In the interest of time, I will just use a toy set from just 2 samples each
+from ENCODE ESC lines and iPSC lines for the sake of vignette build speed. 
+The above data.frame is
+constructed to illustrate that we can run this pipeline on many conditions at once.
+
+```{r explain-meta-df, echo=F}
+mdf <- subset(mdf, CONDITION %in% c("ESC","iPSC")) %>% 
+  droplevels()
+
 mdf %>% 
   lapply(as.vector) %>% 
   lapply(stringr::str_trunc, width=15) %>%
@@ -89,13 +103,16 @@ default setting imports the *subpeaks.bed file from the coltron directory.
 Optionally, you can specify a bed file for each sample in the QUANTSITES field.
 The quantsites are used as a searchspace for motif finding and signal quantification.
 
-We can import these data with a single call.
+We can import these data with a single call. This is usually takes about 1-7 seconds
+per coltron result directory, followed by approximately 6 seconds per sample to quantify
+subpeaks from bam files.
 
-```{r make-object}
-create_coltron_experiment(mdf[1:6,],nthreads = 20, resizeWidth=2000) -> crc
+```{r make-object, eval=F}
+# not run so vignette builds at reasonable speed, using pkg example data
+create_coltron_experiment(mdf,nthreads = 20, resizeWidth=2000) -> toy_crc
 ```
 
-This call performs several tasks at once to improve code clarity:
+This call performed several tasks at once to improve code clarity:
 
 1. Imports data from the coltron directory.
 1. calls Rsubread::featureCounts to quantify signal across regions identified in all of your 
@@ -106,7 +123,7 @@ This call performs several tasks at once to improve code clarity:
 ## CRCExperiment Object
 
 ```{r show-crc-class}
-crc
+toy_crc
 ```
 
 The object returned is a CRCExperiment, which holds a 
@@ -133,7 +150,7 @@ would a normal RangedSummarizedExperiment.
 
 **IMPORTANT** 
 *I have not implemented a helper for clique level analysis via
-motifMatchr, but this is coming and should be easy.*
+motifMatchr, but this is coming soon and should be easy.*
 
 ## clique.signal Workflow
  
@@ -141,7 +158,7 @@ Once we have the CRCExperiment object, we can assign individual motifs to
 cliques and index the ranges of the CRCExperiment by clique.
 
 ```{r ix}
-clique_ix <- index_by_clique(crc)
+clique_ix <- index_by_clique(toy_crc)
 ```
 
 This index takes the form of a sparse logical matrix, just like
@@ -166,7 +183,7 @@ HEME and EPI conditions, I would provide `c("HEME","EPI")` as an argument.
 For the purposes of this demo, we'll just go with the default.
 
 ```{r diff-wrapper}
-diff <- get_diff_cliques(crc, clique_ix, score_type = "z")
+diff <- get_diff_cliques(toy_crc, clique_ix, score_type = "z")
 
 names(diff)
 ```
@@ -184,7 +201,7 @@ class object.
 We can create plenty of plots from these results.
 
 ```{r}
-plot_cliques(diff,contrast=c("HEME","DIG"), plot="volcano")
+plot_cliques(diff,contrast=c("ESC","iPSC"), plot="volcano", use.adjusted.p = F)
 ```
 
 
@@ -200,10 +217,11 @@ tsne_plots
 
 ## Recap
 
-Now we can condense the workflow back - just three lines of R after your
-metadata data.frame is created.
+To recap, let's look at the full workflow with no text in between 
+steps - just three lines of R (after your metadata data.frame is created).
 
 ```{r recap, eval=F}
+# not run
 crc <- create_coltron_experiment(mdf)
 clique_ix <- index_by_clique(crc)
 diff <- get_diff_cliques(crc, clique_ix)

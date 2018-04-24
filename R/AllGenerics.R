@@ -1,4 +1,6 @@
+# -----------------------------------------------------------------------------
 # generics --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 #' @rdname name
 #' @export
@@ -11,6 +13,9 @@ setGeneric("name<-", function(x, value) standardGeneric("name<-"))
 #' @rdname pwms
 #' @export
 setGeneric("pwms", function(x) standardGeneric("pwms"))
+
+#' @rdname combine
+#' @export
 setGeneric("combine", function(x, ..., name = name(x)) {
     if (length(list(...)) > 1) {
         combine(x, do.call(combine, list(...)))
@@ -23,7 +28,7 @@ setGeneric("combine", function(x, ..., name = name(x)) {
 #' @export
 setGeneric("extract_cliques", function(object) standardGeneric("extract_cliques"))
 
-#' @rdname unique_cliques
+#' @rdname extract_cliques
 #' @export
 setGeneric("unique_cliques", function(object) standardGeneric("unique_cliques"))
 
@@ -39,11 +44,11 @@ setGeneric("hash", function(clique) standardGeneric("hash"))
 #' @export
 setGeneric("quantsites", function(object) standardGeneric("quantsites"))
 
-#' @rdname members
+#' @rdname name
 #' @export
 setGeneric("members", function(clique) standardGeneric("members"))
 
-#' @rdname name
+#' @rdname hash
 #' @export
 setGeneric("hashes", function(cliquelist) standardGeneric("hashes"))
 
@@ -51,45 +56,53 @@ setGeneric("hashes", function(cliquelist) standardGeneric("hashes"))
 #' @export
 setGeneric("bam", function(object) standardGeneric("bam"))
 
+#' @rdname show
+#' @export
+setGeneric("show", function(object) standardGeneric("show"))
+
 # set methods -----------------------------------------------------------------
 
-#' @name bam
-#' @rdname CRCViewList
+#' Get bam
+#' @rdname bam
+#' @param object Object holding bam paths.
 #' @export
 setMethod("bam", signature(object = "CRCViewList"), function(object) {
     object %>% lapply(bam)
 })
 
-#' @name bam
-#' @rdname CRCView
+#' @rdname bam
 #' @export
 setMethod("bam", signature(object = "CRCView"), function(object) {
     object@bam
 })
 
-#' @name quantsites
-#' @rdname CRCView
+# -----------------------------------------------------------------------------
+
+#' Get quantsites.
+#' @rdname quantsites
+#' @param object Object holding quantsites.
 #' @export
 setMethod("quantsites", signature(object = "CRCView"), function(object) {
     GRanges(object)
 })
 
-#' @name quantsites
-#' @rdname CRCViewList
+#' @rdname quantsites
 #' @export
 setMethod("quantsites", signature(object = "CRCViewList"), function(object) {
     object@listData %>% lapply(GRanges) %>% GRangesList
 })
 
-#' @name tfbs
-#' @rdname CRCView
+# -----------------------------------------------------------------------------
+
+#' Get tfbs.
+#' @rdname tfbs
+#' @param object Object holding tfbs as a GRanges object.
 #' @export
 setMethod("tfbs", signature(object = "CRCView"), function(object) {
     object@tfbs
 })
 
-#' @name tfbs
-#' @rdname CRCViewList
+#' @rdname tfbs
 #' @export
 setMethod("tfbs", signature(object = "CRCViewList"), function(object) {
     nested_tfbs <- object@listData %>% lapply(tfbs)
@@ -103,143 +116,150 @@ setMethod("tfbs", signature(object = "CRCViewList"), function(object) {
     GRangesList(top_level_tfbs_by_motif)
 })
 
-#' @name tfbs
-#' @rdname CRCExperiment
+#' @rdname tfbs
 #' @export
 setMethod("tfbs", signature(object = "CRCExperiment"), function(object) {
     tfbs(object@crcs)
 })
 
-#' @name unique_cliques
-#' @rdname CliqueList
+# -----------------------------------------------------------------------------
+
+#' Clique extractors.
+#' @rdname extract_cliques
+#' @param object Object holding cliques.
 #' @export
 setMethod("unique_cliques", signature(object = "CliqueList"), function(object) {
     names(object) %>% unique %>% object[.]
 })
 
-#' @name extract_cliques
-#' @rdname CliqueList
+#' @rdname extract_cliques
 #' @export
 setMethod("extract_cliques", signature(object = "CliqueList"), function(object) {
     object@listData
 })
 
-#' @name extract_cliques
-#' @rdname CRCView
+#' @rdname extract_cliques
 #' @export
 setMethod("extract_cliques", signature(object = "CRCView"), function(object) {
     object@cliques
 })
 
-#' @name extract_cliques
-#' @rdname CRCViewList
+#' @rdname extract_cliques
 #' @export
 setMethod("extract_cliques", signature(object = "CRCViewList"), function(object) {
     object@listData %>% lapply(extract_cliques) %>% lapply(extract_cliques) %>% CliqueList()
 })
 
-#' @name extract_cliques
-#' @rdname CRCExperiment
+#' @rdname extract_cliques
 #' @export
 setMethod("extract_cliques", signature(object = "CRCExperiment"), function(object) {
     extract_cliques(object@crcs)
 })
 
-#' @name name
-#' @rdname TranscriptionFactor
+# -----------------------------------------------------------------------------
+
+#' Name getters.
+#' @rdname name
+#' @param x A name-able object.
+#' @param value New name.
 #' @export
 setMethod("name", signature(x = "TranscriptionFactor"), function(x) {
     return(x@name)
 })
 
-#' @name name
-#' @rdname CliqueList
+#' @rdname name
 #' @export
 setMethod("name", signature(x = "CliqueList"), function(x) {
     return(x@name)
 })
 
-#' @name name
-#' @rdname CRCView
+#' @rdname name
 #' @export
 setMethod("name", signature(x = "CRCView"), function(x) {
     return(x@name)
 })
 
-#' @name name
-#' @rdname TranscriptionFactor
+#' @rdname name
 #' @exportMethod 'name<-'
 setReplaceMethod("name", signature(x = "TranscriptionFactor", value = "character"), function(x, value) {
     x@name <- value
     x
 })
 
-#' @name name
-#' @rdname CliqueList
+#' @rdname name
 #' @exportMethod 'name<-'
 setReplaceMethod("name", signature(x = "CliqueList", value = "character"), function(x, value) {
     x@name <- value
     x
 })
 
-#' @name pwms
-#' @rdname TranscriptionFactor
+#' @rdname name
+#' @param clique A clique object.
+#' @export
+setMethod("members", signature(clique = "Clique"), function(clique) {
+  return(clique@members)
+})
+
+# -----------------------------------------------------------------------------
+
+#' Get pwms.
+#' @rdname pwms
+#' @param x A TranscriptionFactor object.
 #' @export
 setMethod("pwms", signature(x = "TranscriptionFactor"), function(x) {
     return(x@pwms)
 })
 
+# -----------------------------------------------------------------------------
 
-
-#' @name combine
-#' @rdname TranscriptionFactor
+#' Combine TranscriptionFactor instances.
+#' @rdname combine
+#' @param x A TranscriptionFactor object or list of TranscriptionFactor objects.
+#' @param ... TranscriptionFactor objects.
+#' @param name A new name for the combined TF. Optional. Defaults to name of first TF.
 #' @export
 setMethod("combine", signature(x = "list"), function(x, ..., name = NULL) {
     w <- unlist(list(x, ...))
     new_name <- name
-    if (is.null(name)) 
+    if (is.null(name))
         new_name <- name(w[[1]])
     pwms <- do.call("c", unlist(lapply(w, FUN = function(z) pwms(z))))
     return(TranscriptionFactor(name = new_name, pwms = pwms))
 })
 
-#' @name combine
-#' @rdname TranscriptionFactor
+#' @rdname combine
 #' @export
 setMethod("combine", signature(x = "TranscriptionFactor"), function(x, ..., name = NULL) {
     w <- unlist(list(x, ...))
     new_name <- name
-    if (is.null(name)) 
+    if (is.null(name))
         new_name <- name(w[[1]])
     pwms <- do.call("c", unlist(lapply(w, FUN = function(z) pwms(z))))
     return(TranscriptionFactor(name = new_name, pwms = pwms))
 })
 
+# -----------------------------------------------------------------------------
 
-#' @name hash
-#' @rdname Clique
+#' Get unique hash.
+#' @rdname hash
+#' @param clique A Clique.
+#' @param cliquelist A CliqueList.
 #' @export
 setMethod("hash", signature(clique = "Clique"), function(clique) {
     return(clique@hash)
 })
 
-#' @name members
-#' @rdname Clique
-#' @export
-setMethod("members", signature(clique = "Clique"), function(clique) {
-    return(clique@members)
-})
-
-#' @name hashes
-#' @rdname CliqueList
+#' @rdname hash
 #' @export
 setMethod("hashes", signature(cliquelist = "CliqueList"), function(cliquelist) {
-    return(cliquelist@clique_hashes)
+  return(cliquelist@clique_hashes)
 })
 
+# -----------------------------------------------------------------------------
 
-#' @name show
-#' @rdname CRCView
+#' Print object representation.
+#' @rdname show
+#' @param object Object with printable representation.
 #' @export
 setMethod("show", "CRCView", function(object) {
     # print name
@@ -250,13 +270,12 @@ setMethod("show", "CRCView", function(object) {
     cat("Bam: ", object@bam, "\n")
 })
 
-#' @name show
-#' @rdname CRCExperiment
+#' @rdname show
 #' @export
 setMethod("show", "CRCExperiment", function(object) {
     # print name
     cat("Class: ", class(object), "\n")
     cat("Samples: ", length(object@crcs), "\n")
     cat("Accessible Sites: ", length(object), "\n")
-    cat("Conditions: ", crc@metadata$CONDITION %>% levels, "\n")
+    cat("Conditions: ", object@metadata$CONDITION %>% levels, "\n")
 })

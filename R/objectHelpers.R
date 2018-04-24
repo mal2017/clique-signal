@@ -11,6 +11,7 @@ list_to_cliquelist <- function(cliques) {
 
 #' Group TFBS  by clique.
 #'
+#' @param object A CRCExperiment, CRCViewList, or CRCView object.
 #' @export
 tfbs_by_clique <- function(object) {
     tfbs_by_tf <- tfbs(object)

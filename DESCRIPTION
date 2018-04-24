@@ -5,24 +5,30 @@ Version: 0.1.0
 Authors@R: person("Matthew", "Lawlor", email = "matt.a.lawlor@gmail.com",
                   role = c("aut","cre"))
 Description: This package provides utilities for importing and comparing
-    networks predicted by the coltron python package.
+    network cliques. Focuses particularly on working with output from the coltron
+    python package for predicted transcription factor circuitry.
 Depends:
+    R (>= 3.4.3),
     S4Vectors,
-    IRanges,
     GenomicRanges,
     SummarizedExperiment,
     magrittr,
+    methods,
+    TFBSTools,
+    utils,
 Imports:
     chromVAR,
     dplyr,
     GenomeInfoDb,
     ggplot2,
+    Matrix,
     Rsubread,
     rtracklayer,
+    stringr,
+    tibble,
     tictoc,
     openssl,
-    tidyverse,
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
