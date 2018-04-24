@@ -2,10 +2,10 @@
 # unionClasses ----------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-setClassUnion("characterOrNULL",c("character","NULL"))
-setClassUnion("GRangesListOrNULL",c("GRangesList","NULL"))
-setClassUnion("GRangesOrNULL",c("GRanges","NULL"))
-setClassUnion("DataFrameOrNULL",c("DataFrame","NULL"))
+setClassUnion("characterOrNULL", c("character", "NULL"))
+setClassUnion("GRangesListOrNULL", c("GRangesList", "NULL"))
+setClassUnion("GRangesOrNULL", c("GRanges", "NULL"))
+setClassUnion("DataFrameOrNULL", c("DataFrame", "NULL"))
 
 # -----------------------------------------------------------------------------
 # classes ---------------------------------------------------------------------
@@ -27,9 +27,9 @@ TranscriptionFactor <- function(name, pwms = NULL) {
   } else if (class(pwms) == "PWMatrixList") {
     pwmlist <- pwms
   } else {
-    pwmlist <- do.call('c',lapply(c(pwms),TFBSTools::PWMatrixList))
+    pwmlist <- do.call("c", lapply(c(pwms), TFBSTools::PWMatrixList))
   }
-  new("TranscriptionFactor",name = name, pwms = pwmlist)
+  new("TranscriptionFactor", name = name, pwms = pwmlist)
 }
 
 # -----------------------------------------------------------------------------
@@ -48,11 +48,11 @@ setClass("Clique",
 
 Clique <- function(tf, ..., name = NULL) {
   others <- list(...)
-  tfs <- c(tf,others)
+  tfs <- c(tf, others)
   members <- sort(unlist(lapply(tfs, FUN = function(x) name(x))))
-  derived_name <- paste(members,collapse = ",")
-  hash <- substr(openssl::md5(derived_name),1,8)
-  new_clique <- do.call(combine,tfs)
+  derived_name <- paste(members, collapse = ",")
+  hash <- substr(openssl::md5(derived_name), 1, 8)
+  new_clique <- do.call(combine, tfs)
   if (is.null(name)) {
     name(new_clique) <- derived_name
   } else {
@@ -76,10 +76,10 @@ setClass("CliqueList",
 
 CliqueList <- function(clique, ..., name=NULL ) {
   cliques <- unlist(list(clique, ...))
-  clique_names <- unlist(lapply(cliques,name))
-  clique_hashes <- unlist(lapply(cliques,hash))
+  clique_names <- unlist(lapply(cliques, name))
+  clique_hashes <- unlist(lapply(cliques, hash))
   new("CliqueList", SimpleList(cliques),
-      name=name, clique_names = clique_names,
+      name = name, clique_names = clique_names,
       clique_hashes = clique_hashes) -> new_clqs
   names(new_clqs) <- clique_names
   new_clqs
@@ -105,10 +105,10 @@ setClass("CRCView",
 
 #' @rdname CRCView
 #' @export
-CRCView <- function(quantsites, cliques, prior_tfbs=NULL,
-                    sample=name(cliques), bampath=NULL){
-  new("CRCView", quantsites, cliques=cliques,
-      name=sample, tfbs = prior_tfbs, bam=bampath)
+CRCView <- function(quantsites, cliques, prior_tfbs = NULL,
+                    sample = name(cliques), bampath = NULL){
+  new("CRCView", quantsites, cliques = cliques,
+      name = sample, tfbs = prior_tfbs, bam = bampath)
 }
 
 # -----------------------------------------------------------------------------
@@ -125,7 +125,7 @@ setClass("CRCViewList",
 #' @export
 CRCViewList <- function(crcview, ..., name=NULL ) {
   crcs <- unlist(list(crcview, ...))
-  crc_names <- unlist(lapply(crcs,name))
+  crc_names <- unlist(lapply(crcs, name))
   new("CRCViewList", SimpleList(crcs),
       samples = crc_names) -> new_crcv
   names(new_crcv) <- crc_names
@@ -147,5 +147,5 @@ CRCViewList <- function(crcview, ..., name=NULL ) {
 #' @rdname CRCExperiment
 #' @export
 CRCExperiment <- function(rse, crclist, cohort = NULL) {
-   new("CRCExperiment", rse, crcs = crclist, name=cohort)
+   new("CRCExperiment", rse, crcs = crclist, name = cohort)
 }

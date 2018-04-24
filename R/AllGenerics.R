@@ -23,7 +23,8 @@ setGeneric("combine",
 
 #' @rdname extract_cliques
 #' @export
-setGeneric("extract_cliques", function(object) standardGeneric("extract_cliques"))
+setGeneric("extract_cliques",
+           function(object) standardGeneric("extract_cliques"))
 
 #' @rdname unique_cliques
 #' @export
@@ -58,7 +59,7 @@ setGeneric("bam", function(object) standardGeneric("bam"))
 #' @name bam
 #' @rdname CRCViewList
 #' @export
-setMethod("bam",signature(object = "CRCViewList"),
+setMethod("bam", signature(object = "CRCViewList"),
           function(object) {
             object %>% lapply(bam)
           }
@@ -67,7 +68,7 @@ setMethod("bam",signature(object = "CRCViewList"),
 #' @name bam
 #' @rdname CRCView
 #' @export
-setMethod("bam",signature(object = "CRCView"),
+setMethod("bam", signature(object = "CRCView"),
           function(object) {
             object@bam
           }
@@ -76,7 +77,7 @@ setMethod("bam",signature(object = "CRCView"),
 #' @name quantsites
 #' @rdname CRCView
 #' @export
-setMethod("quantsites",signature(object = "CRCView"),
+setMethod("quantsites", signature(object = "CRCView"),
           function(object) {
             GRanges(object)
           }
@@ -85,7 +86,7 @@ setMethod("quantsites",signature(object = "CRCView"),
 #' @name quantsites
 #' @rdname CRCViewList
 #' @export
-setMethod("quantsites",signature(object = "CRCViewList"),
+setMethod("quantsites", signature(object = "CRCViewList"),
           function(object) {
             object@listData %>% lapply(GRanges) %>% GRangesList
           }
@@ -94,7 +95,7 @@ setMethod("quantsites",signature(object = "CRCViewList"),
 #' @name tfbs
 #' @rdname CRCView
 #' @export
-setMethod("tfbs",signature(object = "CRCView"),
+setMethod("tfbs", signature(object = "CRCView"),
           function(object) {
             object@tfbs
           }
@@ -103,7 +104,7 @@ setMethod("tfbs",signature(object = "CRCView"),
 #' @name tfbs
 #' @rdname CRCViewList
 #' @export
-setMethod("tfbs",signature(object = "CRCViewList"),
+setMethod("tfbs", signature(object = "CRCViewList"),
           function(object) {
             object@listData %>% lapply(tfbs) -> nested_tfbs
             all_tf_names <- nested_tfbs %>% lapply(names) %>%
@@ -111,7 +112,7 @@ setMethod("tfbs",signature(object = "CRCViewList"),
             top_level_tfbs_by_motif <- list()
             for (i in 1:length(all_tf_names)) {
               all_tf_names[i] -> idx
-              nested_tfbs %>% lapply(`[[`,idx) %>% unlist %>%
+              nested_tfbs %>% lapply(`[[`, idx) %>% unlist %>%
                 GRangesList() %>% unlist %>%
                 GenomicRanges::reduce() -> i_tfbs
               top_level_tfbs_by_motif[[idx]] <- i_tfbs
@@ -123,7 +124,7 @@ setMethod("tfbs",signature(object = "CRCViewList"),
 #' @name tfbs
 #' @rdname CRCExperiment
 #' @export
-setMethod("tfbs",signature(object = "CRCExperiment"),
+setMethod("tfbs", signature(object = "CRCExperiment"),
           function(object) {
             tfbs(object@crcs)
           }
@@ -132,7 +133,7 @@ setMethod("tfbs",signature(object = "CRCExperiment"),
 #' @name unique_cliques
 #' @rdname CliqueList
 #' @export
-setMethod("unique_cliques",signature(object = "CliqueList"),
+setMethod("unique_cliques", signature(object = "CliqueList"),
           function(object) {
             names(object) %>% unique %>% object[.]
           }
@@ -141,7 +142,7 @@ setMethod("unique_cliques",signature(object = "CliqueList"),
 #' @name extract_cliques
 #' @rdname CliqueList
 #' @export
-setMethod("extract_cliques",signature(object = "CliqueList"),
+setMethod("extract_cliques", signature(object = "CliqueList"),
           function(object) {
             object@listData
           }
@@ -150,7 +151,7 @@ setMethod("extract_cliques",signature(object = "CliqueList"),
 #' @name extract_cliques
 #' @rdname CRCView
 #' @export
-setMethod("extract_cliques",signature(object = "CRCView"),
+setMethod("extract_cliques", signature(object = "CRCView"),
           function(object) {
             object@cliques
           }
@@ -159,7 +160,7 @@ setMethod("extract_cliques",signature(object = "CRCView"),
 #' @name extract_cliques
 #' @rdname CRCViewList
 #' @export
-setMethod("extract_cliques",signature(object = "CRCViewList"),
+setMethod("extract_cliques", signature(object = "CRCViewList"),
           function(object) {
             object@listData %>%
               lapply(extract_cliques) %>%
@@ -171,7 +172,7 @@ setMethod("extract_cliques",signature(object = "CRCViewList"),
 #' @name extract_cliques
 #' @rdname CRCExperiment
 #' @export
-setMethod("extract_cliques",signature(object = "CRCExperiment"),
+setMethod("extract_cliques", signature(object = "CRCExperiment"),
           function(object) {
             extract_cliques(object@crcs)
           }
@@ -207,8 +208,8 @@ setMethod("name",
 #' @name name
 #' @rdname TranscriptionFactor
 #' @exportMethod "name<-"
-setReplaceMethod("name",signature(x="TranscriptionFactor",
-                                  value="character"),
+setReplaceMethod("name", signature(x = "TranscriptionFactor",
+                                  value = "character"),
                  function(x, value){
                    x@name <- value
                    x
@@ -218,8 +219,8 @@ setReplaceMethod("name",signature(x="TranscriptionFactor",
 #' @name name
 #' @rdname CliqueList
 #' @exportMethod "name<-"
-setReplaceMethod("name",signature(x="CliqueList",
-                                  value="character"),
+setReplaceMethod("name", signature(x = "CliqueList",
+                                  value = "character"),
                  function(x, value){
                    x@name <- value
                    x
@@ -243,10 +244,10 @@ setMethod("pwms",
 setMethod("combine",
           signature(x = "list"),
           function(x, ..., name = NULL ) {
-            w <- unlist(list(x,...))
+            w <- unlist(list(x, ...))
             new_name <- name
             if (is.null(name)) new_name <- name(w[[1]])
-            pwms <- do.call('c',
+            pwms <- do.call("c",
                             unlist(lapply(w,
                                           FUN = function(z) pwms(z))))
             return(TranscriptionFactor(name = new_name, pwms = pwms))
@@ -259,10 +260,10 @@ setMethod("combine",
 setMethod("combine",
           signature(x = "TranscriptionFactor"),
           function(x, ..., name = NULL ) {
-            w <- unlist(list(x,...))
+            w <- unlist(list(x, ...))
             new_name <- name
             if (is.null(name)) new_name <- name(w[[1]])
-            pwms <- do.call('c',
+            pwms <- do.call("c",
                             unlist(lapply(w,
                                           FUN = function(z) pwms(z))))
             return(TranscriptionFactor(name = new_name, pwms = pwms))
@@ -301,21 +302,22 @@ setMethod("hashes",
 #' @name show
 #' @rdname CRCView
 #' @export
-setMethod("show","CRCView", function(object) {
+setMethod("show", "CRCView", function(object) {
   # print name
-  cat("Class: ", class(object),"\n")
+  cat("Class: ", class(object), "\n")
   cat("Cliques: ", length(object@cliques), "\n")
   cat("Accessible Sites: ", length(object), "\n")
-  cat("TFBS: ", length(head(names(object@tfbs)))," and ",length(object@tfbs)-6," more","\n")
+  cat("TFBS: ", length(head(names(object@tfbs))), " and ",
+      length(object@tfbs) - 6, " more", "\n")
   cat("Bam: ", object@bam, "\n")
 })
 
 #' @name show
 #' @rdname CRCExperiment
 #' @export
-setMethod("show","CRCExperiment", function(object) {
+setMethod("show", "CRCExperiment", function(object) {
   # print name
-  cat("Class: ", class(object),"\n")
+  cat("Class: ", class(object), "\n")
   cat("Samples: ", length(object@crcs), "\n")
   cat("Accessible Sites: ", length(object), "\n")
   cat("Conditions: ", crc@metadata$CONDITION %>% levels, "\n")

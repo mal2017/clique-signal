@@ -8,9 +8,12 @@
 quantifyCutsites <- function(gr, bamlist, nthreads = 8) {
   GenomicRanges::strand(gr) <- "*"
 
-  saf <- data.frame(GeneID = as.character(gr), Chr = GenomicRanges::seqnames(gr),
-                    Start = GenomicRanges::start(gr), End = GenomicRanges::end(gr),
-                    Strand = GenomicRanges::strand(gr)) %>% set_rownames(NULL)
+  saf <- data.frame(GeneID = as.character(gr),
+                    Chr = GenomicRanges::seqnames(gr),
+                    Start = GenomicRanges::start(gr),
+                    End = GenomicRanges::end(gr),
+                    Strand = GenomicRanges::strand(gr)) %>%
+    set_rownames(NULL)
 
   if (is.null(names(bamlist))) {
     names(bamlist) <- lapply(bamlist, strsplit, "/") %>%
@@ -19,7 +22,9 @@ quantifyCutsites <- function(gr, bamlist, nthreads = 8) {
   }
 
   cts <- Rsubread::featureCounts(bamlist, annot.ext = saf,
-                                 nthreads = nthreads, isPairedEnd = FALSE, read2pos = 5,
+                                 nthreads = nthreads,
+                                 isPairedEnd = FALSE,
+                                 read2pos = 5,
                                  allowMultiOverlap = TRUE)
 
   rawcts <- cts$counts
@@ -39,9 +44,12 @@ quantifyCutsites <- function(gr, bamlist, nthreads = 8) {
 quantifyReads <- function(gr, bamlist, nthreads = 8) {
   GenomicRanges::strand(gr) <- "*"
 
-  saf <- data.frame(GeneID = as.character(gr), Chr = GenomicRanges::seqnames(gr),
-                    Start = GenomicRanges::start(gr), End = GenomicRanges::end(gr),
-                    Strand = GenomicRanges::strand(gr)) %>% set_rownames(NULL)
+  saf <- data.frame(GeneID = as.character(gr),
+                    Chr = GenomicRanges::seqnames(gr),
+                    Start = GenomicRanges::start(gr),
+                    End = GenomicRanges::end(gr),
+                    Strand = GenomicRanges::strand(gr)) %>%
+    set_rownames(NULL)
 
   if (is.null(names(bamlist))) {
     names(bamlist) <- lapply(bamlist, strsplit, "/") %>%
