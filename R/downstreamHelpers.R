@@ -2,11 +2,14 @@
 #'
 #' @param object A CRCExperiment object.
 #' @param remove_subsets Bool. Remove cliques that are subsets of other cliques.
+#' @param combine_similar FALSE or int n. Recursively combine cliques until all cliques have more than n differences from all others.
 #' @return A sparse Matrix holding clique motif presence/absence.
 #' @export
-index_by_clique <- function(object, remove_subsets = T) {
+index_by_clique <- function(object, remove_subsets = T, combine_similar = F) {
     stopifnot(class(object) == "CRCExperiment")
-    cliquewise_tfbs <- tfbs_by_clique(object, remove_subsets = remove_subsets)
+    cliquewise_tfbs <- tfbs_by_clique(object,
+                                      remove_subsets = remove_subsets,
+                                      combine_similar = combine_similar)
     # https://support.bioconductor.org/p/82452/
     message("Indexing accessible sites by clique-grouped TFBS...", appendLF = F)
     tictoc::tic()
