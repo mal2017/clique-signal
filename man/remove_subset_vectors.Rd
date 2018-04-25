@@ -2,10 +2,13 @@
 % Please edit documentation in R/downstreamHelpers.R
 \name{remove_subset_vectors}
 \alias{remove_subset_vectors}
-\title{Return vectors that are not subsets of other vectors in obj}
+\title{Remove vecs that are perfect subsets of other vecs}
 \usage{
 remove_subset_vectors(named_list_of_vectors)
 }
+\arguments{
+\item{named_list_of_vectors}{list of vecs}
+}
 \description{
-Return vectors that are not subsets of other vectors in obj
+Not really intended to be called by user.
 }

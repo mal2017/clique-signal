@@ -64,10 +64,33 @@ setGeneric("show", function(object) standardGeneric("show"))
 #' @export
 setGeneric("remove_subset_cliques", function(object) standardGeneric("remove_subset_cliques"))
 
+#' @rdname combine_similar_cliques
+#' @export
+setGeneric("combine_similar_cliques", function(object, ...) standardGeneric("combine_similar_cliques"))
+
+
 # set methods -----------------------------------------------------------------
+
+#' Recursively combine cliques that are similar
+#' @rdname combine_similar_cliques
+#' @param object CliqueList object.
+#' @param ... Other args. See other methods.
+#' @param combine_when_at_least_as_similar Return cliquelist with all cliques having at least this many differences.
+#' @export
+setMethod("combine_similar_cliques", signature(object = "CliqueList"),
+          function(object, combine_when_at_least_as_similar = 1) {
+            lapply(object, members) %>%
+              combine_similar_vectors(max_diff_to_combine = combine_when_at_least_as_similar) %>%
+              list_to_cliquelist()
+          })
+
+
+
+# -----------------------------------------------------------------------------
 
 #' Remove cliques that are subsets of other cliques
 #' @rdname remove_subset_cliques
+#' @param object CliqueList object.
 #' @export
 setMethod("remove_subset_cliques", signature(object = "CliqueList"),
           function(object) {

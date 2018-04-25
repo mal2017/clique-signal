@@ -110,7 +110,11 @@ plot_cliques_volcano <- function(diffs, p, contrast = NULL) {
 }
 
 
-#' Return vectors that are not subsets of other vectors in obj
+#' Remove vecs that are perfect subsets of other vecs
+#'
+#' Not really intended to be called by user.
+#'
+#' @param named_list_of_vectors list of vecs
 remove_subset_vectors <- function(named_list_of_vectors) {
   nms <- names(named_list_of_vectors)
   subset_vec_ix <- c()
@@ -125,4 +129,45 @@ remove_subset_vectors <- function(named_list_of_vectors) {
     }
   }
   named_list_of_vectors[-subset_vec_ix]
+}
+
+
+#' Combine similar vecs
+#'
+#' Not really intended to be called by user.
+#'
+#' @param named_list_of_vectors list of vecs
+#' @param max_diff_to_combine recursively combine until all cliques are have more diffs than this arg.
+#' @param verbose print progress for debugging
+combine_similar_vectors <- function(named_list_of_vectors, max_diff_to_combine = 1, verbose =F) {
+  get_setdiff_total <- function(a,b) {
+    only_a <- length(setdiff(a,b))
+    only_b <- length(setdiff(b,a))
+    tot_diff <- only_a + only_b
+  }
+  obj <- named_list_of_vectors
+  len <- length(obj)
+  new_obj <- list()
+  for(i in 1:len) {
+    if (verbose) message(paste0("Finding vecs similar to ",names(obj)[i]))
+    # get diffs for each other vector vs obj[i]
+    diffs <- lapply(obj, get_setdiff_total, obj[[i]])
+    which(diffs <= max_diff_to_combine) -> ix
+    if (length(ix) == 1) {
+      new_obj[[names(obj)[i]]] <- obj[[i]]
+    } else {
+      obj[ix] %>% unlist %>% unique %>% sort -> new_vec
+      new_vec_name <- paste(new_vec,collapse = ",")
+      if (!(new_vec_name %in% names(new_obj))) {
+        new_obj[[new_vec_name]] <- new_vec
+      } else {
+        next
+      }
+    }
+  }
+  if (length(new_obj) == length(obj)) {
+    return(new_obj)
+  } else {
+    combine_similar_vectors(new_obj)
+  }
 }

@@ -13,6 +13,9 @@ remove_subset_cliques(object)
 
 \S4method{remove_subset_cliques}{CRCExperiment}(object)
 }
+\arguments{
+\item{object}{CliqueList object.}
+}
 \description{
 Remove cliques that are subsets of other cliques
 }
