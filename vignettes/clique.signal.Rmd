@@ -109,7 +109,7 @@ subpeaks from bam files.
 
 ```{r make-object, eval=F}
 # not run so vignette builds at reasonable speed, using pkg example data
-create_coltron_experiment(mdf,nthreads = 20, resizeWidth=2000) -> toy_crc
+create_coltron_experiment(mdf,nthreads = 20, resizeWidth=5000) -> toy_crc
 ```
 
 This call performed several tasks at once to improve code clarity:

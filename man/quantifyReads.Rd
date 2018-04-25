@@ -4,7 +4,7 @@
 \alias{quantifyReads}
 \title{Suitable for NGS in general.}
 \usage{
-quantifyReads(gr, bamlist, nthreads = 8)
+quantifyReads(gr, bamlist, nthreads = 8, paired_end = T)
 }
 \arguments{
 \item{gr}{GRanges object with the regions to quantify.}
@@ -12,6 +12,8 @@ quantifyReads(gr, bamlist, nthreads = 8)
 \item{bamlist}{Preferably a named list holding bam file paths, or a character vector.}
 
 \item{nthreads}{Number of processors to use. Passed to Rsubread::featureCounts.}
+
+\item{paired_end}{Treat bams as paired-end or not. Defaults to TRUE.}
 }
 \value{
 A matrix holding count data with axes regions x samples.
