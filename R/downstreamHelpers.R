@@ -1,11 +1,12 @@
 #' Index a CRCExperiment ranges by clique motif presence.
 #'
 #' @param object A CRCExperiment object.
+#' @param remove_subsets Bool. Remove cliques that are subsets of other cliques.
 #' @return A sparse Matrix holding clique motif presence/absence.
 #' @export
-index_by_clique <- function(object) {
+index_by_clique <- function(object, remove_subsets = T) {
     stopifnot(class(object) == "CRCExperiment")
-    cliquewise_tfbs <- tfbs_by_clique(object)
+    cliquewise_tfbs <- tfbs_by_clique(object, remove_subsets = remove_subsets)
     # https://support.bioconductor.org/p/82452/
     message("Indexing accessible sites by clique-grouped TFBS...", appendLF = F)
     tictoc::tic()
@@ -106,4 +107,22 @@ plot_cliques_volcano <- function(diffs, p, contrast = NULL) {
     ggplot(toplot, aes(x = x, y = y, color = x)) + geom_point() + theme_classic() + geom_hline(yintercept = -log10(0.05),
         color = "darkgray") + scale_color_gradient2(mid = "lightgray", low = "blue", high = "red") +
         xlim(lims_x) + ylim(lims_y)
+}
+
+
+#' Return vectors that are not subsets of other vectors in obj
+remove_subset_vectors <- function(named_list_of_vectors) {
+  nms <- names(named_list_of_vectors)
+  subset_vec_ix <- c()
+  for (i in 1:length(nms)) {
+    for (k in 1:length(nms)) {
+      if (i == k) next
+      if (all(named_list_of_vectors[[i]] %in%
+              named_list_of_vectors[[k]])) {
+        subset_vec_ix <- c(subset_vec_ix,i)
+        break
+      }
+    }
+  }
+  named_list_of_vectors[-subset_vec_ix]
 }

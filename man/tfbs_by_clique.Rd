@@ -4,10 +4,12 @@
 \alias{tfbs_by_clique}
 \title{Group TFBS  by clique.}
 \usage{
-tfbs_by_clique(object)
+tfbs_by_clique(object, remove_subsets = T)
 }
 \arguments{
 \item{object}{A CRCExperiment, CRCViewList, or CRCView object.}
+
+\item{remove_subsets}{Bool. Exclude cliques that are subsets of other cliques.}
 }
 \description{
 Group TFBS  by clique.

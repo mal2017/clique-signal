@@ -60,7 +60,33 @@ setGeneric("bam", function(object) standardGeneric("bam"))
 #' @export
 setGeneric("show", function(object) standardGeneric("show"))
 
+#' @rdname remove_subset_cliques
+#' @export
+setGeneric("remove_subset_cliques", function(object) standardGeneric("remove_subset_cliques"))
+
 # set methods -----------------------------------------------------------------
+
+#' Remove cliques that are subsets of other cliques
+#' @rdname remove_subset_cliques
+#' @export
+setMethod("remove_subset_cliques", signature(object = "CliqueList"),
+          function(object) {
+            not_subsets <- lapply(object, members) %>%
+              remove_subset_vectors() %>% names
+            object[not_subsets]
+})
+
+#' @rdname remove_subset_cliques
+#' @export
+setMethod("remove_subset_cliques", signature(object = "CRCExperiment"),
+          function(object) {
+            not_subsets <- lapply(object, members) %>%
+              remove_subset_vectors() %>% names
+            object[not_subsets]
+          })
+
+
+# -----------------------------------------------------------------------------
 
 #' Get bam
 #' @rdname bam

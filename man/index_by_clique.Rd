@@ -4,10 +4,12 @@
 \alias{index_by_clique}
 \title{Index a CRCExperiment ranges by clique motif presence.}
 \usage{
-index_by_clique(object)
+index_by_clique(object, remove_subsets = T)
 }
 \arguments{
 \item{object}{A CRCExperiment object.}
+
+\item{remove_subsets}{Bool. Remove cliques that are subsets of other cliques.}
 }
 \value{
 A sparse Matrix holding clique motif presence/absence.

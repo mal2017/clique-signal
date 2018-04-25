@@ -12,10 +12,12 @@ list_to_cliquelist <- function(cliques) {
 #' Group TFBS  by clique.
 #'
 #' @param object A CRCExperiment, CRCViewList, or CRCView object.
+#' @param remove_subsets Bool. Exclude cliques that are subsets of other cliques.
 #' @export
-tfbs_by_clique <- function(object) {
+tfbs_by_clique <- function(object, remove_subsets = T) {
     tfbs_by_tf <- tfbs(object)
     cliques <- unique_cliques(extract_cliques(object))
+    if (remove_subsets) cliques <- remove_subset_cliques(cliques)
     get_tfbs_gr <- function(tfnames, gr = tfbs_by_tf) {
         gr[tfnames] %>% unlist %>% GenomicRanges::reduce()
     }
