@@ -127,7 +127,7 @@ create_coltron_experiment <- function(metadata, quantsites = "SUBPEAKS", resizeW
         ctdata <- quantifyReads(all_candidate_sites, bamlist = bams, nthreads = nthreads)
     }, file = "/dev/null")
     cts <- ctdata$cts
-    aligned_depth <- ctdata$aligned_depth
+    aligned_depth <- unlist(ctdata$aligned_depth)
 
     colnames(cts) <- names(bams)
     metadata$depth <- aligned_depth
