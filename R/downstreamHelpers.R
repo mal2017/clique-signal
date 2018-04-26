@@ -167,12 +167,10 @@ get_setdiff_total <- function(a,b) {
 #' @import doParallel
 combine_similar_vectors <- function(named_list_of_vectors,
                                      max_diff_to_combine = 1, verbose =F) {
-  tictoc::tic()
   new_obj <- foreach(v = named_list_of_vectors) %dopar% {
     get_merged_vec(v, named_list_of_vectors,
                    max_diff = max_diff_to_combine)
   }
-  tictoc::toc()
   names_new_obj <- lapply(new_obj, paste, collapse = ",") # sorted above
   names(new_obj) <- names_new_obj
   new_obj %<>%
