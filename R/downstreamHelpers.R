@@ -118,22 +118,27 @@ plot_cliques_volcano <- function(diffs, p, contrast = NULL) {
 #' Not really intended to be called by user.
 #'
 #' @param named_list_of_vectors list of vecs
+#' @import foreach
+#' @import doParallel
 remove_subset_vectors <- function(named_list_of_vectors) {
-  nms <- names(named_list_of_vectors)
-  subset_vec_ix <- c()
-  for (i in 1:length(nms)) {
-    for (k in 1:length(nms)) {
+  obj <- unique(named_list_of_vectors)
+  names_obj <- lapply(obj, paste, collapse = ",")
+  names(obj) <- names_obj
+  seq <- 1:length(obj)
+  ix <- foreach(i = seq, .combine = 'c') %dopar% {
+    subsets_of_i <- c()
+    for (k in seq) {
       if (i == k) next
-      if (all(named_list_of_vectors[[i]] %in%
-              named_list_of_vectors[[k]])) {
-        subset_vec_ix <- c(subset_vec_ix,i)
-        break
+      if (all(obj[[k]] %in% obj[[i]])) {
+        subsets_of_i <- c(subsets_of_i, k)
+        print(paste0(i,"::",k))
       }
     }
+    subsets_of_i
   }
-  named_list_of_vectors[-subset_vec_ix]
-}
 
+  obj[-unique(ix)]
+}
 
 # ------------------------------
 
