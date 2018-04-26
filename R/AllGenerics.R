@@ -71,11 +71,11 @@ setGeneric("combine_similar_cliques", function(object, ...) standardGeneric("com
 
 # set methods -----------------------------------------------------------------
 
-#' Recursively combine cliques that are similar
+#' Combine cliques that are similar
 #' @rdname combine_similar_cliques
 #' @param object CliqueList object.
 #' @param ... Other args. See other methods.
-#' @param combine_when_at_least_as_similar Return cliquelist with all cliques having at least this many differences.
+#' @param combine_when_at_least_as_similar Return cliquelist with <N differences combined.
 #' @export
 setMethod("combine_similar_cliques", signature(object = "CliqueList"),
           function(object, combine_when_at_least_as_similar = 1) {

@@ -13,7 +13,7 @@ list_to_cliquelist <- function(cliques) {
 #'
 #' @param object A CRCExperiment, CRCViewList, or CRCView object.
 #' @param remove_subsets Bool. Exclude cliques that are subsets of other cliques.
-#' @param combine_similar FALSE or int n. Recursively combine cliques until all cliques have more than n differences from all others.
+#' @param combine_similar FALSE or int n. Combine cliques with less than N differences.
 #' @export
 tfbs_by_clique <- function(object, remove_subsets = T, combine_similar = F) {
     tfbs_by_tf <- tfbs(object)

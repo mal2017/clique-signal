@@ -17,3 +17,7 @@ combine_similar_vectors(named_list_of_vectors, max_diff_to_combine = 1,
 \description{
 Not really intended to be called by user.
 }
+\details{
+Uses doparallel backend, register this with
+'registerDoParallel(12)'.
+}

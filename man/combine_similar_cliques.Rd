@@ -4,7 +4,7 @@
 \name{combine_similar_cliques}
 \alias{combine_similar_cliques}
 \alias{combine_similar_cliques,CliqueList-method}
-\title{Recursively combine cliques that are similar}
+\title{Combine cliques that are similar}
 \usage{
 combine_similar_cliques(object, ...)
 
@@ -16,8 +16,8 @@ combine_similar_cliques(object, ...)
 
 \item{...}{Other args. See other methods.}
 
-\item{combine_when_at_least_as_similar}{Return cliquelist with all cliques having at least this many differences.}
+\item{combine_when_at_least_as_similar}{Return cliquelist with <N differences combined.}
 }
 \description{
-Recursively combine cliques that are similar
+Combine cliques that are similar
 }

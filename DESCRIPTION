@@ -18,7 +18,9 @@ Depends:
     utils,
 Imports:
     chromVAR,
+    doParallel,
     dplyr,
+    foreach,
     GenomeInfoDb,
     ggplot2,
     Matrix,

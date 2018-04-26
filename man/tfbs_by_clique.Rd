@@ -11,7 +11,7 @@ tfbs_by_clique(object, remove_subsets = T, combine_similar = F)
 
 \item{remove_subsets}{Bool. Exclude cliques that are subsets of other cliques.}
 
-\item{combine_similar}{FALSE or int n. Recursively combine cliques until all cliques have more than n differences from all others.}
+\item{combine_similar}{FALSE or int n. Combine cliques with less than N differences.}
 }
 \description{
 Group TFBS  by clique.

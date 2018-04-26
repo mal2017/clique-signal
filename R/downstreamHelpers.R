@@ -135,42 +135,45 @@ remove_subset_vectors <- function(named_list_of_vectors) {
 }
 
 
+# ------------------------------
+
+get_merged_vec <- function(vec, list_of_vecs, max_diff = NULL) {
+  diffs <- lapply(list_of_vecs, get_setdiff_total, vec)
+  which(diffs <= max_diff) -> ix
+  list_of_vecs[ix] %>% unlist %>% unique %>% sort -> new_vec
+  new_vec
+}
+
+get_setdiff_total <- function(a,b) {
+  length(setdiff(a,b)) + length(setdiff(b,a))
+}
+
 #' Combine similar vecs
 #'
 #' Not really intended to be called by user.
 #'
+#' Uses doparallel backend, register this with
+#' 'registerDoParallel(12)'.
+#'
 #' @param named_list_of_vectors list of vecs
 #' @param max_diff_to_combine recursively combine until all cliques are have more diffs than this arg.
 #' @param verbose print progress for debugging
-combine_similar_vectors <- function(named_list_of_vectors, max_diff_to_combine = 1, verbose =F) {
-  get_setdiff_total <- function(a,b) {
-    only_a <- length(setdiff(a,b))
-    only_b <- length(setdiff(b,a))
-    tot_diff <- only_a + only_b
+#' @import foreach
+#' @import doParallel
+combine_similar_vectors <- function(named_list_of_vectors,
+                                     max_diff_to_combine = 1, verbose =F) {
+  tictoc::tic()
+  new_obj <- foreach(v = named_list_of_vectors) %dopar% {
+    get_merged_vec(v, named_list_of_vectors,
+                   max_diff = max_diff_to_combine)
   }
-  obj <- named_list_of_vectors
-  len <- length(obj)
-  new_obj <- list()
-  for(i in 1:len) {
-    if (verbose) message(paste0("Finding vecs similar to ",names(obj)[i]))
-    # get diffs for each other vector vs obj[i]
-    diffs <- lapply(obj, get_setdiff_total, obj[[i]])
-    which(diffs <= max_diff_to_combine) -> ix
-    if (length(ix) == 1) {
-      new_obj[[names(obj)[i]]] <- obj[[i]]
-    } else {
-      obj[ix] %>% unlist %>% unique %>% sort -> new_vec
-      new_vec_name <- paste(new_vec,collapse = ",")
-      if (!(new_vec_name %in% names(new_obj))) {
-        new_obj[[new_vec_name]] <- new_vec
-      } else {
-        next
-      }
-    }
-  }
-  if (length(new_obj) == length(obj)) {
-    return(new_obj)
-  } else {
-    combine_similar_vectors(new_obj)
-  }
+  tictoc::toc()
+  names_new_obj <- lapply(new_obj, paste, collapse = ",") # sorted above
+  names(new_obj) <- names_new_obj
+  new_obj %<>%
+    names %>%
+    sort %>%
+    duplicated %>% not %>%
+    which %>% new_obj[.]
+  return(new_obj)
 }
