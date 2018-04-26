@@ -131,7 +131,6 @@ remove_subset_vectors <- function(named_list_of_vectors) {
       if (i == k) next
       if (all(obj[[k]] %in% obj[[i]])) {
         subsets_of_i <- c(subsets_of_i, k)
-        print(paste0(i,"::",k))
       }
     }
     subsets_of_i
